@@ -971,6 +971,26 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </div>
 </div>
 
+<div class="modal-overlay" id="modal-editprev" style="z-index:1100;">
+    <div class="modal-box" style="max-width:520px;max-height:92dvh;overflow-y:auto;">
+        <div class="modal-header">
+            <div class="modal-title-w"><div class="modal-icon">✎</div><div class="modal-title"><em id="ep-tit">Editar previsión</em></div></div>
+            <button class="btn-close" onclick="closeModal('modal-editprev')">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div class="form-group" id="ep-fecha-g"><label class="form-label">Fecha</label><input type="date" id="ep-fecha" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Hora</label><input type="time" id="ep-hora" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Operación</label><select id="ep-tipo" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Cliente</label><select id="ep-proy" class="form-select"></select></div>
+            <div class="form-group"><label class="form-label">Agencia</label><input type="text" id="ep-agencia" class="form-input" list="dl-ag" autocomplete="off"></div>
+            <div class="form-group"><label class="form-label">Matrícula</label><input type="text" id="ep-mat" class="form-input" list="dl-mat" autocomplete="off"></div>
+            <div class="form-group" style="grid-column:1/-1"><label class="form-label">Notas</label><input type="text" id="ep-obs" class="form-input"></div>
+            <div class="form-group" id="ep-auto-g" style="grid-column:1/-1"><label class="form-label">Se repite</label><select id="ep-auto" class="form-select"><option value="">Solo manual</option><option value="lv">Auto Lun–Vie</option><option value="all">Auto todos los días</option></select></div>
+        </div>
+        <button class="btn-submit" onclick="guardarEdicion()">Guardar cambios</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="modal-reporte">
     <div class="modal-box wide" style="height:90vh;display:flex;flex-direction:column;">
         <div class="modal-header">
@@ -1895,7 +1915,7 @@ function renderHabituales() {
     box.innerHTML = habituales.slice().sort((a, b) => a.hora.localeCompare(b.hora) || a.agencia.localeCompare(b.agencia)).map(h => `
         <div class="prevision-card hab-card" draggable="true" ondragstart="habDragStart(event,${h.id})" ondragend="habDragEnd()">
             <div class="prev-actions">
-                <button class="btn-card-action edit" onclick="editarHabitual(${h.id})" title="Editar">✎</button>
+                <button class="btn-card-action edit" onclick="abrirEdicion('hab',${h.id})" title="Editar">✎</button>
                 <button class="btn-card-action del"  onclick="eliminarHabitual(${h.id})" title="Eliminar">✕</button>
             </div>
             <div class="prev-time">${esc(h.hora)} <span style="font-size:8px;opacity:.6;color:var(--text2);">${esc(h.tipo || 'DESCARGA')}</span></div>
@@ -1988,6 +2008,33 @@ function renderMetricas() {
 // Hora -> minutos (ordena bien aunque venga como "9:30" o vacía)
 const _hk = p => { const [h, m] = String(p.hora || '').split(':'); return (parseInt(h) || 0) * 60 + (parseInt(m) || 0); };
 
+// Edición en ventana emergente (delante de Previsiones)
+let _edicion = null;
+function abrirEdicion(tipo, id) {
+    const o = (tipo === 'hab' ? habituales : previsiones).find(x => x.id === id); if (!o) return;
+    _edicion = { tipo, id };
+    document.getElementById('ep-tipo').innerHTML = document.getElementById('pre-tipo').innerHTML;
+    document.getElementById('ep-proy').innerHTML = document.getElementById('pre-proy').innerHTML;
+    const set = (k, v) => { document.getElementById('ep-' + k).value = v == null ? '' : v; };
+    set('fecha', o.fecha); set('hora', o.hora); set('tipo', o.tipo || 'DESCARGA'); set('proy', o.proyecto);
+    set('agencia', o.agencia); set('mat', o.matricula); set('obs', o.observaciones); set('auto', o.auto || '');
+    document.getElementById('ep-fecha-g').style.display = tipo === 'hab' ? 'none' : '';
+    document.getElementById('ep-auto-g').style.display  = tipo === 'hab' ? '' : 'none';
+    document.getElementById('ep-tit').textContent = tipo === 'hab' ? 'Editar habitual' : 'Editar previsión';
+    openModal('modal-editprev');
+}
+function guardarEdicion() {
+    if (!_edicion) return;
+    const o = (_edicion.tipo === 'hab' ? habituales : previsiones).find(x => x.id === _edicion.id); if (!o) return closeModal('modal-editprev');
+    const v = k => document.getElementById('ep-' + k).value;
+    const ag = v('agencia').trim().toUpperCase();
+    if (!ag || !v('hora') || (_edicion.tipo === 'prev' && !v('fecha'))) return showToast('⚠ Faltan datos obligatorios');
+    Object.assign(o, { hora: v('hora'), tipo: v('tipo'), proyecto: v('proy'), agencia: ag, matricula: v('mat').toUpperCase(), observaciones: v('obs').toUpperCase() });
+    if (_edicion.tipo === 'prev') o.fecha = v('fecha'); else o.auto = v('auto');
+    closeModal('modal-editprev'); showToast('✓ Cambios guardados');
+    renderCalendario(); broadcastState();
+}
+
 function renderCalendario() {
     const grid = document.getElementById('grid-calendario'); grid.innerHTML='';
     const ahora=new Date(), hoyIso=isoLocal(ahora);
@@ -2006,7 +2053,7 @@ function renderCalendario() {
             card.className = `prevision-card ${p.llegado?'arrived':esLate?'late':''}`;
             card.innerHTML = `
                 <div class="prev-actions">
-                    <button class="btn-card-action edit" onclick="iniciarEditarPrevision(${p.id})" title="Editar">✎</button>
+                    <button class="btn-card-action edit" onclick="abrirEdicion('prev',${p.id})" title="Editar">✎</button>
                     <button class="btn-card-action del"  onclick="eliminarPrevision(${p.id})" title="Eliminar">✕</button>
                 </div>
                 <div class="prev-time">${p.hora} <span style="font-size:8px;opacity:.6;color:var(--text2);">${(p.tipo||'DESCARGA')}</span></div>

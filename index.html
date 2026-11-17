@@ -1982,6 +1982,9 @@ function renderMetricas() {
         + tabla('Por agencia', 'agencia') + tabla('Por cliente', 'proyecto');
 }
 
+// Hora -> minutos (ordena bien aunque venga como "9:30" o vacía)
+const _hk = p => { const [h, m] = String(p.hora || '').split(':'); return (parseInt(h) || 0) * 60 + (parseInt(m) || 0); };
+
 function renderCalendario() {
     const grid = document.getElementById('grid-calendario'); grid.innerHTML='';
     const ahora=new Date(), hoyIso=isoLocal(ahora);
@@ -1994,8 +1997,8 @@ function renderCalendario() {
         dayEl.addEventListener('dragleave',e=>{ if(!dayEl.contains(e.relatedTarget)) dayEl.classList.remove('drop-over'); });
         dayEl.addEventListener('drop',e=>{ e.preventDefault(); dayEl.classList.remove('drop-over'); const id=_dragHab; habDragEnd(); if(id!=null) usarHabitual(id,fIso); });
         dayEl.innerHTML = `<div class="cal-day-header ${isHoy?'today':''}">${isHoy?'HOY · ':''}${d.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})}</div>`;
-        previsiones.filter(p=>p.fecha===fIso).sort((a,b)=>a.hora.localeCompare(b.hora)).forEach(p=>{
-            const esLate = !p.llegado && (fIso<hoyIso||(fIso===hoyIso&&p.hora<horaAct));
+        previsiones.filter(p=>p.fecha===fIso).sort((a,b)=>_hk(a)-_hk(b)||(a.agencia||'').localeCompare(b.agencia||'')||a.id-b.id).forEach(p=>{
+            const esLate = !p.llegado && (fIso<hoyIso||(fIso===hoyIso&&_hk(p)<ahora.getHours()*60+ahora.getMinutes()));
             const card = document.createElement('div');
             card.className = `prevision-card ${p.llegado?'arrived':esLate?'late':''}`;
             card.innerHTML = `

@@ -139,7 +139,7 @@
 
         /* BOARD */
         .board {
-            display: grid; grid-template-columns: repeat(3, 1fr);
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr) auto;
             gap: 10px; padding: 10px; flex: 1; min-height: 0;
             position: relative; z-index: 1;
         }
@@ -456,6 +456,12 @@
         #hab-menu button { text-align: left; padding: 9px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; color: var(--text); font-family: var(--sans); font-size: 12px; font-weight: 600; cursor: pointer; text-transform: capitalize; }
         #hab-menu button:hover { background: var(--orange-g2); border-color: var(--border-s); }
         #hab-menu button.multi { color: #c4b5fd; background: var(--purple-g); border-color: rgba(139,92,246,0.3); text-transform: none; }
+
+        /* Pasillo trasero (fila inferior, ancho de los 3 muelles) */
+        #col-5 { grid-column: 1 / -1; display: grid; grid-template-columns: 230px minmax(0, 1.2fr) minmax(0, 1fr); max-height: 38vh; border-color: rgba(139,92,246,0.3); }
+        #col-5 .dock-header { flex-direction: column; align-items: flex-start; gap: 10px; border-bottom: 0; border-right: 1px solid var(--border); }
+        #col-5 .slot-active, #col-5 .queue-section { overflow-y: auto; min-height: 0; }
+        @media (max-width: 900px) { #col-5 { display: flex; flex-direction: column; max-height: none; grid-column: auto; } #col-5 .dock-header { flex-direction: row; align-items: center; border-right: 0; } }
 
         /* Toast */
         #toast { position: fixed; bottom: 68px; left: 50%; transform: translateX(-50%) translateY(16px); opacity: 0; pointer-events: none; z-index: 9999; background: linear-gradient(135deg, #0a1628, #060e1e); border: 1px solid var(--border-s); border-radius: 10px; padding: 10px 20px 10px 14px; font-size: 12px; font-weight: 600; white-space: nowrap; transition: all .3s cubic-bezier(.34,1.56,.64,1); display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 24px rgba(255,102,0,0.08); }
@@ -781,6 +787,23 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <div class="queue-list" id="lista-4"></div>
         </div>
     </div>
+    <div class="dock-col" data-muelle="5" ondragover="allowDrop(event)" ondrop="handleDrop(event,5)" id="col-5">
+        <div class="dock-header">
+            <div class="dock-header-left">
+                <div class="dock-num">PT</div>
+                <div><div class="dock-name">Pasillo trasero</div><div class="dock-capacity" id="cap-5">Sin actividad</div></div>
+            </div>
+            <span class="dock-badge badge-free" id="badge-5">Libre</span>
+        </div>
+        <div id="active-5" class="slot-active"></div>
+        <div class="queue-section">
+            <div class="queue-header-bar">
+                <div class="queue-label">Furgonetas · carga lateral</div>
+                <div class="queue-count" id="qc-5">0</div>
+            </div>
+            <div class="queue-list" id="lista-5"></div>
+        </div>
+    </div>
 </div>
 
 <div class="admin-bar">
@@ -867,7 +890,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <button class="btn-submit" style="margin:0;background:linear-gradient(135deg,var(--blue),#2563eb);" onclick="imprimirHojaInbound()">📄 Hoja Inbound<br><span style="font-weight:500;font-size:10px;opacity:.8;">Formato A4</span></button>
         </div>
 
-        <div class="form-group full" style="margin-bottom:16px;"><label class="form-label">Muelle de destino</label><select id="inbound-muelle" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option></select></div>
+        <div class="form-group full" style="margin-bottom:16px;"><label class="form-label">Muelle de destino</label><select id="inbound-muelle" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo trasero</option></select></div>
         <button class="btn-submit" onclick="finalizarAsignacionMuelle()">Asignar a Muelle →</button>
         <button class="btn-cancel" onclick="cancelarInbound()">Cancelar</button>
     </div>
@@ -962,8 +985,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
+const MUELLES = [2,3,4,5]; // 5 = Pasillo trasero
+const nomMu = m => m == 5 ? 'Pasillo trasero' : 'Muelle 0' + m;
 const LISTA_PROYECTOS = ["BITRON","REBOUND","NWT","CBC","SIT&B","TOYOTA","VANTAX","SHIMA SEIKI","OTROS"];
-let dbMuelles = { 2:[], 3:[], 4:[] };
+let dbMuelles = { 2:[], 3:[], 4:[], 5:[] };
 let historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isoLocal = d => { d = new Date(d); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
@@ -986,14 +1011,14 @@ function loadLocal() {
         if (!raw) return;
         const d = JSON.parse(raw);
         if (!d.dbMuelles) return;
-        dbMuelles   = d.dbMuelles;
+        dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; });
         historico   = d.historico || [];
         previsiones = d.previsiones || []; habituales = d.habituales || []; borrados = d.borrados || []; localRev = d.rev || 0;
         // Restaurar fechas
         const fixDates = arr => arr.forEach(c => {
             ['t_llegada','t_inicio','t_fin'].forEach(k => { if (c[k]) c[k] = new Date(c[k]); });
         });
-        [2,3,4].forEach(m => fixDates(dbMuelles[m] || []));
+        MUELLES.forEach(m => fixDates(dbMuelles[m] || []));
         fixDates(historico);
         showToast('Estado anterior cargado automáticamente');
     } catch(e) { console.warn('loadLocal error', e); }
@@ -1188,7 +1213,7 @@ function _applySnapshot(p) {
     const fixDates = arr => (arr||[]).forEach(c => {
         ['t_llegada','t_inicio','t_fin'].forEach(k => { if (c[k]) c[k] = new Date(c[k]); });
     });
-    [2,3,4].forEach(m => fixDates(dbMuelles[m]));
+    MUELLES.forEach(m => fixDates(dbMuelles[m]));
     fixDates(historico);
     saveLocal();
     renderPizarra();
@@ -1224,7 +1249,7 @@ function importarEstadoCompleto(input) {
         try {
             const d = JSON.parse(e.target.result);
             if (d.dbMuelles && d.historico && d.previsiones) {
-                dbMuelles = d.dbMuelles; historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales;
+                dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; }); historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales;
                 renderPizarra(); renderReporte();
                 if (document.getElementById('modal-calendario').classList.contains('open')) renderCalendario();
                 broadcastState(); showToast('Estado restaurado con éxito');
@@ -1259,7 +1284,7 @@ tickClock(); setInterval(()=>{ tickClock(); const a=document.activeElement; if(!
 
 function updateKPIs() {
     let activos=0, espera=0;
-    [2,3,4].forEach(m => {
+    MUELLES.forEach(m => {
         if (dbMuelles[m].length>0 && dbMuelles[m][0].estado==='proceso') activos++;
         espera += dbMuelles[m].filter(c=>c.estado==='espera').length;
     });
@@ -1273,7 +1298,7 @@ function updateKPIs() {
 }
 
 function renderPizarra() {
-    [2,3,4].forEach(i => {
+    MUELLES.forEach(i => {
         const actDiv = document.getElementById(`active-${i}`);
         const lstDiv = document.getElementById(`lista-${i}`);
         const badge  = document.getElementById(`badge-${i}`);
@@ -1414,18 +1439,18 @@ function handleDrop(ev, dest) {
         if (camion.estado==='proceso') { camion.estado='espera'; camion.t_inicio=null; }
         dbMuelles[dest].push(camion);
         renderPizarra(); broadcastState();
-        showToast(`Camión trasladado a Muelle 0${dest}`);
+        showToast(`Camión trasladado a ${nomMu(dest)}`);
     }
 }
 
-function iniciar(m) { dbMuelles[m][0].estado='proceso'; dbMuelles[m][0].t_inicio=new Date(); renderPizarra(); broadcastState(); showToast(`Muelle 0${m}: Operación iniciada`); }
+function iniciar(m) { dbMuelles[m][0].estado='proceso'; dbMuelles[m][0].t_inicio=new Date(); renderPizarra(); broadcastState(); showToast(`${nomMu(m)}: Operación iniciada`); }
 function finalizar(m) {
     const c = dbMuelles[m].shift();
     c.t_fin = new Date(); c.muelle = m;
     if (!c.comentario) c.comentario = "";
     historico.push(c);
     renderPizarra(); broadcastState();
-    showToast(`Muelle 0${m}: Finalizado — ${fmtMin(mins(c.t_inicio,c.t_fin))}`);
+    showToast(`${nomMu(m)}: Finalizado — ${fmtMin(mins(c.t_inicio,c.t_fin))}`);
 }
 
 let pendingCamion = null;
@@ -1509,7 +1534,7 @@ function finalizarAsignacionMuelle() {
     closeModal('modal-inbound');
     pendingCamion = null;
     renderPizarra(); broadcastState();
-    showToast(`${camion.agencia} asignado a Muelle 0${mu}`);
+    showToast(`${camion.agencia} asignado a ${nomMu(mu)}`);
 }
 
 /* ---------- EAN-13: generación de dígito de control y barras (sin librerías externas) ---------- */
@@ -2006,7 +2031,7 @@ function renderReporte() {
             <td class="td-orange">${esc(h.matricula)}</td>
             <td>${h.tipo}</td>
             <td style="font-size:10.5px;color:var(--text2);">${h.bultos||0}b · ${h.pallets||0}p · ${h.kg||0}kg</td>
-            <td style="font-family:var(--mono);color:var(--text2);">${h.muelle?'0'+h.muelle:'—'}</td>
+            <td style="font-family:var(--mono);color:var(--text2);">${h.muelle?(h.muelle==5?'PT':'0'+h.muelle):'—'}</td>
             <td>${fmt(h.t_llegada)}</td><td>${fmt(h.t_inicio)}</td><td>${fmt(h.t_fin)}</td>
             <td class="td-orange">${h.t_fin&&h.t_inicio?fmtMin(mins(h.t_inicio,h.t_fin)):'—'}</td>
             <td style="text-align:left;padding-left:14px;">
@@ -2037,7 +2062,7 @@ function exportarCSV(){
   a.download='Yusen_Historico_'+isoLocal(new Date())+'.csv'; a.click();
 }
 const _fin = finalizar;
-finalizar = function(m){ const c=dbMuelles[m][0]; _fin(m); _undo={t:'fin',m,c}; showToast(`Muelle 0${m} finalizado — pulsa ↶ Deshacer si ha sido un error`); };
+finalizar = function(m){ const c=dbMuelles[m][0]; _fin(m); _undo={t:'fin',m,c}; showToast(`${nomMu(m)} finalizado — pulsa ↶ Deshacer si ha sido un error`); };
 function deshacer(){
   const u=_undo; if(!u) return showToast('Nada que deshacer'); _undo=null;
   if(u.t==='fin'){ historico=historico.filter(h=>h.id!==u.c.id); u.c.t_fin=null; delete u.c.muelle; dbMuelles[u.m].unshift(u.c); }
@@ -2055,7 +2080,7 @@ document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mod
 <div class="form-group"><label class="form-label">Bultos</label><input id="ed-bultos" type="number" min="0" class="form-input"></div>
 <div class="form-group"><label class="form-label">Pallets</label><input id="ed-pallets" type="number" min="0" class="form-input"></div>
 <div class="form-group"><label class="form-label">Peso (Kg)</label><input id="ed-kg" type="number" min="0" step="0.1" class="form-input"></div>
-<div class="form-group"><label class="form-label">Muelle</label><select id="ed-mu" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option></select></div>
+<div class="form-group"><label class="form-label">Muelle</label><select id="ed-mu" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo trasero</option></select></div>
 </div>
 <button class="btn-submit" onclick="guardarCamion()">Guardar cambios</button>
 <button class="btn-cancel" style="color:var(--red)" onclick="eliminarCamion()">Eliminar camión</button>
@@ -2088,8 +2113,8 @@ function subirCola(m,i){ const [c]=dbMuelles[m].splice(i,1); dbMuelles[m].splice
 const _al={}; let _ac=null;
 document.addEventListener('pointerdown',()=>{ _ac=_ac||new (window.AudioContext||window.webkitAudioContext)(); },{once:true});
 function beep(n){ if(!_ac) return; for(let k=0;k<n;k++){ const o=_ac.createOscillator(),g=_ac.createGain(); o.connect(g); g.connect(_ac.destination); o.frequency.value=880; g.gain.value=.15; o.start(_ac.currentTime+k*.3); o.stop(_ac.currentTime+k*.3+.15); } }
-setInterval(()=>[2,3,4].forEach(m=>{ const c=dbMuelles[m][0]; if(!c) return; const e=minsSince(c.t_llegada);
-  [30,90].forEach(l=>{ if(e>=l&&e<l+2&&!_al[c.id+'_'+l]){ _al[c.id+'_'+l]=1; beep(l===30?1:3); showToast(`⚠ Muelle 0${m}: ${l} min desde la llegada`); } }); }),5000);
+setInterval(()=>MUELLES.forEach(m=>{ const c=dbMuelles[m][0]; if(!c) return; const e=minsSince(c.t_llegada);
+  [30,90].forEach(l=>{ if(e>=l&&e<l+2&&!_al[c.id+'_'+l]){ _al[c.id+'_'+l]=1; beep(l===30?1:3); showToast(`⚠ ${nomMu(m)}: ${l} min desde la llegada`); } }); }),5000);
 const _wl=()=>{ try{ navigator.wakeLock&&navigator.wakeLock.request('screen'); }catch(_){} };
 _wl(); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) _wl(); });
 
@@ -2140,9 +2165,9 @@ function mergeRemote(p){
   const L=_snapshot(), win=(p.rev||0)>localRev?p:L, lose=win===p?L:p;
   const B=new Set([...borrados,...(p.borrados||[])]);
   const hist=new Map(); [...(lose.historico||[]),...(win.historico||[])].forEach(h=>{ if(!B.has(h.id)) hist.set(h.id,h); });
-  const seen=new Set(), dm={2:[],3:[],4:[]};
-  [2,3,4].forEach(m=>(win.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)){ dm[m].push(c); seen.add(c.id); hist.delete(c.id); } }));
-  [2,3,4].forEach(m=>(lose.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)&&!seen.has(c.id)&&!hist.has(c.id)){ dm[m].push(c); seen.add(c.id); } }));
+  const seen=new Set(), dm={2:[],3:[],4:[],5:[]};
+  MUELLES.forEach(m=>(win.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)){ dm[m].push(c); seen.add(c.id); hist.delete(c.id); } }));
+  MUELLES.forEach(m=>(lose.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)&&!seen.has(c.id)&&!hist.has(c.id)){ dm[m].push(c); seen.add(c.id); } }));
   const pv=new Map(); [...(lose.previsiones||[]),...(win.previsiones||[])].forEach(x=>{ if(!B.has(x.id)) pv.set(x.ak||x.id,x); });
   dbMuelles=dm; historico=[...hist.values()].sort((a,b)=>a.id-b.id); previsiones=[...pv.values()].sort((a,b)=>a.id-b.id);
   const hb=new Map(); [...(lose.habituales||[]),...(win.habituales||[])].forEach(x=>{ if(!B.has(x.id)){ const o=hb.get(x.id); hb.set(x.id,o?{...x,gen:[...new Set([...(o.gen||[]),...(x.gen||[])])]}:x); } }); habituales=[...hb.values()].sort((a,b)=>a.id-b.id);

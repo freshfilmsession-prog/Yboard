@@ -457,6 +457,17 @@
         #hab-menu button:hover { background: var(--orange-g2); border-color: var(--border-s); }
         #hab-menu button.multi { color: #c4b5fd; background: var(--purple-g); border-color: rgba(139,92,246,0.3); text-transform: none; }
 
+        /* Cada día de la previsión con su propio desplazamiento */
+        .cal-body .cal-grid { grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+        .cal-day { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(255,102,0,0.55) rgba(255,255,255,0.05); }
+        .cal-day::-webkit-scrollbar { width: 9px; }
+        .cal-day::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 5px; }
+        .cal-day::-webkit-scrollbar-thumb { background: rgba(255,102,0,0.55); border-radius: 5px; }
+        .cal-day > .cal-day-header { position: sticky; top: 0; z-index: 3; flex-shrink: 0; }
+        .cal-day > .prevision-card { flex-shrink: 0; }
+        .cal-day > .cal-day-header { background: #0a1a36; }
+        .cal-day > .cal-day-header.today { background: linear-gradient(var(--orange-g2), var(--orange-g2)), #0a1a36; }
+
         /* Cada muelle con su propia barra de desplazamiento */
         .dock-col { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(255,102,0,0.55) rgba(255,255,255,0.05); }
         .dock-col::-webkit-scrollbar { width: 9px; }
@@ -670,7 +681,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   #btn-pre-submit { width: 100% !important; min-height: 54px; }
   #btn-pre-cancel-edit { min-height: 54px; }
   .cal-grid { grid-template-columns: 1fr !important; overflow: visible !important; flex: none !important; }
-  .cal-day { min-height: 0; }
+  .cal-day { min-height: 0; overflow: visible; }
+  .cal-body .cal-grid { grid-template-rows: none; overflow: visible; }
   .cal-body { flex-direction: column; flex: none; }
   .cal-nav .nav-btn { min-height: 44px; }
   .hab-panel { width: 100%; order: -1; max-height: 42dvh; }

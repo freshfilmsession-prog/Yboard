@@ -430,6 +430,14 @@
         .btn-card-action.edit:hover { color: var(--yellow); background: var(--yellow-g); border-color: rgba(245,158,11,0.2); }
 
         /* Habituales */
+        .cal-nav { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+        .cal-nav .nav-btn { height: 32px; font-size: 10px; }
+        #cal-rango { margin-left: auto; font-size: 11px; color: var(--text2); text-transform: capitalize; }
+        .mt-bars { display: flex; align-items: flex-end; gap: 3px; height: 110px; padding: 8px 4px 0; }
+        .mt-bar { flex: 1; background: linear-gradient(180deg, var(--orange), var(--orange-d)); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; }
+        .mt-lbl { display: flex; gap: 3px; padding: 2px 4px 10px; font-size: 8px; color: var(--text2); text-align: center; }
+        .mt-lbl span { flex: 1; }
+        .mt-h { margin: 16px 0 6px; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); }
         .cal-body { display: flex; gap: 10px; flex: 1; min-height: 0; }
         .cal-body .cal-grid { min-width: 0; }
         .cal-grid.hab-dragging .cal-day { border: 1px dashed rgba(139,92,246,0.45); }
@@ -648,6 +656,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   .cal-grid { grid-template-columns: 1fr !important; overflow: visible !important; flex: none !important; }
   .cal-day { min-height: 0; }
   .cal-body { flex-direction: column; flex: none; }
+  .cal-nav .nav-btn { min-height: 44px; }
   .hab-panel { width: 100%; order: -1; max-height: 42dvh; }
   .hab-card .btn-checkin { min-height: 40px; font-size: 11px; }
   #btn-hab-save { width: 100%; min-height: 54px; flex: 1 1 100%; }
@@ -715,6 +724,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div class="hd-actions">
         <button class="nav-btn primary" onclick="openModal('modal-add')">＋ Nueva Llegada</button>
         <button class="nav-btn purple"  onclick="abrirCalendario()">▦ Previsiones</button>
+    <button class="nav-btn blue" onclick="abrirMetricas()">📊 Métricas</button>
         <button class="nav-btn blue"    onclick="abrirReporte()">≡ Histórico</button>
     </div>
 </header>
@@ -879,22 +889,37 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <div class="form-group"><label class="form-label">Hora</label><input type="time" id="pre-hora" class="form-input"></div>
             <div class="form-group"><label class="form-label">Operación</label><select id="pre-tipo" class="form-select"><option value="DESCARGA">↓ Descarga</option><option value="CARGA">↑ Carga</option></select></div>
             <div class="form-group"><label class="form-label">Cliente</label><select id="pre-proy" class="form-select selector-proyectos"></select></div>
-            <div class="form-group"><label class="form-label">Agencia</label><input type="text" id="pre-agencia" class="form-input" placeholder="DHL…"></div>
-            <div class="form-group"><label class="form-label">Matrícula</label><input type="text" id="pre-mat" class="form-input" placeholder="1234 ABC"></div>
+            <div class="form-group"><label class="form-label">Agencia</label><input type="text" id="pre-agencia" class="form-input" list="dl-ag" autocomplete="off" placeholder="DHL…"></div>
+            <div class="form-group"><label class="form-label">Matrícula</label><input type="text" id="pre-mat" class="form-input" list="dl-mat" autocomplete="off" placeholder="1234 ABC"></div>
             <div class="form-group"><label class="form-label">Notas / Referencia</label><input type="text" id="pre-obs" class="form-input" placeholder="Pedido, pallets…"></div>
+            <div class="form-group"><label class="form-label">Habitual: se repite</label><select id="hab-auto" class="form-select"><option value="">Solo manual</option><option value="lv">Auto Lun–Vie</option><option value="all">Auto todos los días</option></select></div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;">
                 <button id="btn-pre-submit" onclick="guardarPrevision()" class="btn-submit" style="margin-top:0;padding:11px 18px;width:auto;white-space:nowrap;">Añadir</button>
                 <button id="btn-hab-save" onclick="guardarHabitual()" class="nav-btn purple" style="height:42px;white-space:nowrap;" title="Guarda estos datos (sin fecha) como habitual para arrastrarlo luego a cualquier día">★ Guardar habitual</button>
                 <button id="btn-pre-cancel-edit" onclick="cancelarEdicionPrevision()" class="nav-btn" style="height:42px;display:none;background:var(--red-g);border-color:rgba(239,68,68,0.3);color:var(--red);">✕ Cancelar</button>
             </div>
         </div>
+        <div class="cal-nav"><button class="nav-btn" onclick="calMover(-7)">◀ Semana</button><button class="nav-btn primary" onclick="calMover(0)">Hoy</button><button class="nav-btn" onclick="calMover(7)">Semana ▶</button><span id="cal-rango"></span></div>
         <div class="cal-body">
             <div class="cal-grid" id="grid-calendario"></div>
             <aside class="hab-panel">
                 <div class="hab-head">★ Habituales<small>Arrastra al día que quieras</small></div>
                 <div id="hab-list"></div>
+                <datalist id="dl-ag"></datalist><datalist id="dl-mat"></datalist>
             </aside>
         </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-metricas">
+    <div class="modal-box wide" style="height:90vh;display:flex;flex-direction:column;overflow-y:auto;">
+        <div class="modal-header">
+            <div class="modal-title-w"><div class="modal-icon">📊</div><div class="modal-title"><em>Métricas</em> de operación</div></div>
+            <button class="btn-close" onclick="closeModal('modal-metricas')">✕</button>
+        </div>
+        <div class="filter-panel"><div class="form-group"><label class="form-label">Periodo</label><select id="m-per" class="form-select" onchange="renderMetricas()"><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Último año</option><option value="0">Todo el histórico</option></select></div></div>
+        <div class="stats-row" id="m-kpis"></div>
+        <div id="m-body"></div>
     </div>
 </div>
 
@@ -1648,7 +1673,10 @@ function imprimirHojaInbound() {
     showToast('📄 Generando hoja de inbound');
 }
 
-function abrirCalendario() { openModal('modal-calendario'); cancelarEdicionPrevision(); renderCalendario(); }
+function abrirCalendario() {
+    _calOff = 0; openModal('modal-calendario'); cancelarEdicionPrevision(); autoGenerarHabituales() && broadcastState(); renderCalendario();
+    try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (_) {}
+}
 
 function guardarPrevision() {
     const editId = document.getElementById('pre-edit-id').value;
@@ -1692,7 +1720,7 @@ function cancelarEdicionPrevision() {
     document.getElementById('cal-form-title').textContent = "Añadir";
     document.getElementById('btn-pre-submit').textContent = "Añadir";
     document.getElementById('btn-pre-cancel-edit').style.display = "none";
-    document.getElementById('hab-edit-id').value = "";
+    document.getElementById('hab-edit-id').value = ""; document.getElementById('hab-auto').value = "";
     document.getElementById('btn-hab-save').textContent = "★ Guardar habitual";
     ['pre-agencia','pre-mat','pre-obs','pre-fecha','pre-hora'].forEach(id=>document.getElementById(id).value='');
 }
@@ -1717,7 +1745,8 @@ function guardarHabitual() {
         tipo: document.getElementById('pre-tipo').value,
         proyecto: document.getElementById('pre-proy').value,
         matricula: document.getElementById('pre-mat').value.toUpperCase(),
-        observaciones: document.getElementById('pre-obs').value.toUpperCase()
+        observaciones: document.getElementById('pre-obs').value.toUpperCase(),
+        auto: document.getElementById('hab-auto').value
     };
     const ex = editId ? habituales.find(x => x.id == editId) : null;
     if (ex) { Object.assign(ex, data); showToast(`★ Habitual actualizado: ${a}`); }
@@ -1736,6 +1765,7 @@ function editarHabitual(id) {
     document.getElementById('pre-agencia').value = h.agencia;
     document.getElementById('pre-mat').value     = h.matricula || '';
     document.getElementById('pre-obs').value     = h.observaciones || '';
+    document.getElementById('hab-auto').value    = h.auto || '';
     document.getElementById('btn-hab-save').textContent = '★ Actualizar habitual';
     document.getElementById('btn-pre-cancel-edit').style.display = 'inline-flex';
     showToast(`Editando habitual: ${h.agencia}`);
@@ -1751,7 +1781,7 @@ function eliminarHabitual(id) {
 function _diasVisibles() {
     const hoy = isoLocal(new Date());
     return Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(); d.setDate(d.getDate() + i); const iso = isoLocal(d);
+        const d = new Date(); d.setDate(d.getDate() + i + _calOff); const iso = isoLocal(d);
         return { iso, dow: d.getDay(), hoy: iso === hoy, label: d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) };
     });
 }
@@ -1820,10 +1850,89 @@ function renderHabituales() {
             </div>
             <div class="prev-time">${esc(h.hora)} <span style="font-size:8px;opacity:.6;color:var(--text2);">${esc(h.tipo || 'DESCARGA')}</span></div>
             <div class="prev-agency">${esc(h.agencia)}</div>
+            ${h.auto ? `<div class="prev-sub" style="color:#c4b5fd">↻ ${h.auto === 'lv' ? 'Lun–Vie' : 'Todos los días'}</div>` : ''}
             <div class="prev-sub">${esc(h.proyecto)}${h.matricula ? ' · ' + esc(h.matricula) : ''}</div>
             ${h.observaciones ? `<div class="prev-obs">${esc(h.observaciones)}</div>` : ''}
             <button class="btn-checkin" onclick="elegirDiaHabitual(${h.id},this,event)">＋ Añadir a un día</button>
         </div>`).join('');
+}
+
+let _calOff = 0;
+function calMover(n) { _calOff = n === 0 ? 0 : _calOff + n; renderCalendario(); }
+
+// Habituales automáticos: genera las próximas 2 semanas (una sola vez por día, no resucita las borradas)
+function autoGenerarHabituales() {
+    let ch = false; const hoy = isoLocal(new Date());
+    habituales.filter(h => h.auto).forEach(h => {
+        h.gen = (h.gen || []).filter(f => f >= hoy);
+        for (let i = 0; i < 14; i++) {
+            const d = new Date(); d.setDate(d.getDate() + i);
+            const f = isoLocal(d), dow = d.getDay();
+            if (h.auto === 'lv' && (dow === 0 || dow === 6)) continue;
+            if (h.gen.includes(f)) continue;
+            h.gen.push(f); ch = true;
+            if (_yaExiste(h, f)) continue;
+            previsiones.push({ id: _uid(), ak: h.id + '|' + f, fecha: f, hora: h.hora, agencia: h.agencia, tipo: h.tipo, proyecto: h.proyecto, matricula: h.matricula || '', observaciones: h.observaciones || '', llegado: false });
+        }
+    });
+    if (ch) showToast('↻ Previsiones generadas desde habituales');
+    return ch;
+}
+setInterval(() => { if (autoGenerarHabituales()) { broadcastState(); if (document.getElementById('modal-calendario').classList.contains('open')) renderCalendario(); } }, 600000);
+
+// Sugerencias de agencia/matrícula desde el histórico + autorrelleno
+function actualizarSugerencias() {
+    const all = [...historico, ...previsiones, ...habituales];
+    const top = k => { const m = {}; all.forEach(x => { const v = (x[k] || '').trim(); if (v) m[v] = (m[v] || 0) + 1; }); return Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 60).map(v => `<option value="${esc(v)}">`).join(''); };
+    document.getElementById('dl-ag').innerHTML = top('agencia');
+    document.getElementById('dl-mat').innerHTML = top('matricula');
+}
+document.getElementById('pre-agencia').addEventListener('change', e => {
+    const a = e.target.value.trim().toUpperCase(); if (!a) return;
+    const l = [...historico, ...previsiones].filter(x => x.agencia === a).pop(); if (!l) return;
+    if (!document.getElementById('pre-mat').value && l.matricula) document.getElementById('pre-mat').value = l.matricula;
+    if (l.proyecto) document.getElementById('pre-proy').value = l.proyecto;
+    if (l.tipo) document.getElementById('pre-tipo').value = l.tipo;
+});
+
+// Alertas de retraso (previsiones de hoy sin llegar tras 15 min)
+const _alertados = new Set();
+function _beep() { try { const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = 880; g.gain.value = .15; o.start(); o.stop(c.currentTime + .25); } catch (_) {} }
+function chequearAlertas() {
+    const n = new Date(), hoy = isoLocal(n), min = n.getHours() * 60 + n.getMinutes();
+    previsiones.filter(p => p.fecha === hoy && !p.llegado && !_alertados.has(p.id)).forEach(p => {
+        const [h, m] = (p.hora || '0:0').split(':').map(Number);
+        if (min - (h * 60 + m) < 15) return;
+        _alertados.add(p.id); showToast(`⏰ Retraso: ${p.agencia} (${p.hora}) no ha llegado`); _beep();
+        try { if (window.Notification && Notification.permission === 'granted') new Notification('Camión con retraso', { body: `${p.agencia} · ${p.hora}` }); } catch (_) {}
+    });
+}
+setInterval(chequearAlertas, 60000);
+
+// Métricas
+function abrirMetricas() { openModal('modal-metricas'); renderMetricas(); }
+function renderMetricas() {
+    const per = +document.getElementById('m-per').value, lim = new Date(); lim.setDate(lim.getDate() - per);
+    const data = historico.filter(h => !per || (h.fecha || '') >= isoLocal(lim));
+    const dif = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 60000 : null;
+    const fm = v => v == null ? '—' : Math.round(v) + ' min';
+    const avg = a => { a = a.filter(x => x != null && x >= 0); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; };
+    const punt = h => { const p = previsiones.find(x => x.id === h.previsionId); if (!p || !h.t_llegada) return null; const d = dif(new Date(p.fecha + 'T' + p.hora), h.t_llegada); return d == null ? null : d <= 15; };
+    const rows = a => ({ n: a.length, esp: avg(a.map(h => dif(h.t_llegada, h.t_inicio))), op: avg(a.map(h => dif(h.t_inicio, h.t_fin))), pt: (() => { const v = a.map(punt).filter(x => x != null); return v.length ? Math.round(100 * v.filter(Boolean).length / v.length) + '%' : '—'; })() });
+    const g = rows(data);
+    document.getElementById('m-kpis').innerHTML = [['orange', g.n, 'Camiones'], ['blue', fm(g.esp), 'Espera media'], ['green', fm(g.op), 'Operación media'], ['orange', g.pt, 'Puntualidad (±15 min)']]
+        .map(k => `<div class="stat-card ${k[0]}"><div class="stat-val">${k[1]}</div><div class="stat-lbl">${k[2]}</div></div>`).join('');
+    const tabla = (tit, key) => {
+        const m = {}; data.forEach(h => { const k = h[key] || '—'; (m[k] = m[k] || []).push(h); });
+        const t = Object.entries(m).map(([k, a]) => [k, rows(a)]).sort((a, b) => b[1].n - a[1].n).slice(0, 15);
+        return `<div class="mt-h">${tit}</div><div class="table-wrap" style="flex:none"><table><thead><tr><th>${key === 'agencia' ? 'Agencia' : 'Cliente'}</th><th>Camiones</th><th>Espera media</th><th>Operación media</th><th>Puntualidad</th></tr></thead><tbody>`
+            + t.map(([k, r]) => `<tr><td class="td-orange">${esc(k)}</td><td>${r.n}</td><td>${fm(r.esp)}</td><td>${fm(r.op)}</td><td>${r.pt}</td></tr>`).join('') + '</tbody></table></div>';
+    };
+    const hrs = Array(24).fill(0); data.forEach(h => { if (h.t_inicio) hrs[new Date(h.t_inicio).getHours()]++; });
+    const mx = Math.max(1, ...hrs);
+    document.getElementById('m-body').innerHTML = (data.length ? '' : '<div class="hab-empty">Sin datos en el histórico para este periodo.</div>')
+        + `<div class="mt-h">Actividad por hora de inicio</div><div class="mt-bars">${hrs.map((n, i) => `<div class="mt-bar" style="height:${Math.max(2, 100 * n / mx)}%" title="${i}:00 · ${n} camiones"></div>`).join('')}</div><div class="mt-lbl">${hrs.map((_, i) => `<span>${i}</span>`).join('')}</div>`
+        + tabla('Por agencia', 'agencia') + tabla('Por cliente', 'proyecto');
 }
 
 function renderCalendario() {
@@ -1831,7 +1940,7 @@ function renderCalendario() {
     const ahora=new Date(), hoyIso=isoLocal(ahora);
     const horaAct = ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0');
     for (let i=0;i<7;i++) {
-        const d = new Date(); d.setDate(d.getDate()+i);
+        const d = new Date(); d.setDate(d.getDate()+i+_calOff);
         const fIso=isoLocal(d), isHoy=fIso===hoyIso;
         const dayEl = document.createElement('div'); dayEl.className='cal-day'; dayEl.dataset.fecha=fIso;
         dayEl.addEventListener('dragover',e=>{ if(_dragHab==null) return; e.preventDefault(); e.dataTransfer.dropEffect='copy'; dayEl.classList.add('drop-over'); });
@@ -1856,7 +1965,8 @@ function renderCalendario() {
         });
         grid.appendChild(dayEl);
     }
-    renderHabituales();
+    renderHabituales(); actualizarSugerencias();
+    const dv = _diasVisibles(); document.getElementById('cal-rango').textContent = dv[0].label + ' – ' + dv[6].label;
 }
 
 function prepararCheckIn(id) {
@@ -2033,9 +2143,9 @@ function mergeRemote(p){
   const seen=new Set(), dm={2:[],3:[],4:[]};
   [2,3,4].forEach(m=>(win.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)){ dm[m].push(c); seen.add(c.id); hist.delete(c.id); } }));
   [2,3,4].forEach(m=>(lose.dbMuelles[m]||[]).forEach(c=>{ if(!B.has(c.id)&&!seen.has(c.id)&&!hist.has(c.id)){ dm[m].push(c); seen.add(c.id); } }));
-  const pv=new Map(); [...(lose.previsiones||[]),...(win.previsiones||[])].forEach(x=>{ if(!B.has(x.id)) pv.set(x.id,x); });
+  const pv=new Map(); [...(lose.previsiones||[]),...(win.previsiones||[])].forEach(x=>{ if(!B.has(x.id)) pv.set(x.ak||x.id,x); });
   dbMuelles=dm; historico=[...hist.values()].sort((a,b)=>a.id-b.id); previsiones=[...pv.values()].sort((a,b)=>a.id-b.id);
-  const hb=new Map(); [...(lose.habituales||[]),...(win.habituales||[])].forEach(x=>{ if(!B.has(x.id)) hb.set(x.id,x); }); habituales=[...hb.values()].sort((a,b)=>a.id-b.id);
+  const hb=new Map(); [...(lose.habituales||[]),...(win.habituales||[])].forEach(x=>{ if(!B.has(x.id)){ const o=hb.get(x.id); hb.set(x.id,o?{...x,gen:[...new Set([...(o.gen||[]),...(x.gen||[])])]}:x); } }); habituales=[...hb.values()].sort((a,b)=>a.id-b.id);
   borrados=[...B].sort((a,b)=>a-b).slice(-500); localRev=Math.max(localRev,p.rev||0);
 }
 
@@ -2043,6 +2153,7 @@ inicializarSelectsProyectos();
 loadLocal();     // Cargar estado persistido del día anterior
 renderPizarra();
 
+if (autoGenerarHabituales()) broadcastState();
 // Auto-reconectar a la sala guardada
 const _salaGuardada = localStorage.getItem(LS_SALA);
 if (_salaGuardada) {

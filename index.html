@@ -6,6 +6,8 @@
     <title>Yusen · Control de Muelles</title>
     <meta name="theme-color" content="#010b18">
 
+    <script>window.__DRV=/[?&]chk=/.test(location.search)</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
     <style>
@@ -714,6 +716,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   #nube-msg.wait { display: block; background: rgba(255,255,255,.06); color: var(--text2); }
 }
 #nube-msg { display: none; }
+
+/* check-in QR */
+#chk-tray{position:fixed;right:12px;bottom:12px;width:min(370px,calc(100vw - 24px));max-height:62vh;overflow:auto;z-index:900;background:var(--bg2,#0a1c30);border:2px solid var(--orange,#ff7a1a);border-radius:16px;box-shadow:0 14px 40px #000b;padding:10px;display:none}
+#chk-tray .chk-h{font-weight:800;cursor:pointer;padding:2px 4px 8px}#chk-tray .chk-h b{background:var(--orange,#ff7a1a);color:#fff;border-radius:20px;padding:1px 9px;margin-left:6px}
+#chk-tray.min .chk-c{display:none}.chk-c{background:var(--bg3,#10283f);border:1px solid var(--border,#1d3b58);border-left:5px solid var(--orange,#ff7a1a);border-radius:12px;padding:10px;margin-bottom:8px}
+.chk-m{font-size:24px;font-weight:900;letter-spacing:.05em}.chk-s{font-size:12px;line-height:1.55;color:var(--text2,#8aa1ba);margin:4px 0 8px}.chk-s a{color:var(--orange,#ff7a1a)}
+.chk-b{display:flex;gap:6px}.chk-b button{flex:1;padding:12px 0;border-radius:10px;border:0;background:var(--orange,#ff7a1a);color:#fff;font-weight:800;font-size:16px;cursor:pointer}.chk-b button.s{flex:.6;background:#2a4560}
+#drv{position:fixed;inset:0;z-index:99999;overflow:auto;background:#010b18;color:#e6eef7;padding:16px;font-family:Inter,system-ui,sans-serif;max-width:none}
+#drv>*{max-width:480px;margin-left:auto;margin-right:auto}#drv h1{font-size:26px;margin:14px auto 4px}#drv label{display:block;font-size:12px;color:#8aa1ba;margin:12px auto 4px}
+#drv input,#drv select{width:100%;padding:14px;font-size:17px;border-radius:12px;border:1px solid #1d3b58;background:#10283f;color:#fff}#drv .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+#drv .sg{display:grid;grid-template-columns:1fr 1fr;gap:8px}#drv .sg button{padding:16px;border-radius:14px;border:2px solid #1d3b58;background:#10283f;color:#fff;font-weight:700;font-size:16px}#drv .sg button.on{border-color:#ff7a1a;background:#ff7a1a26}
+#drv .lg{display:flex;gap:6px;justify-content:flex-end}#drv .lg button{padding:6px 10px;border-radius:20px;border:1px solid #1d3b58;background:#10283f;color:#fff}#drv .lg button.on{background:#ff7a1a;border-color:#ff7a1a}
+#drv .bt{width:100%;margin-top:20px;padding:18px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#ff7a1a;color:#fff}
+#drv .dc{text-align:center;margin-top:30px}#drv .pl{display:inline-block;background:#f4f4f0;color:#111;border-left:14px solid #1a3a8a;border-radius:8px;padding:2px 16px;font-size:34px;font-weight:900;letter-spacing:.06em;margin-bottom:20px}#drv .go{font-weight:800;font-size:20px;color:#2ecc71}#drv .bg{font-size:120px;font-weight:900;color:#2ecc71;line-height:1.1}
+
 </style>
 </head>
 <body>
@@ -754,6 +771,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </div>
     <div class="hd-actions">
         <button class="nav-btn primary" onclick="openModal('modal-add')">＋ Nueva Llegada</button>
+        <button class="nav-btn" onclick="chkQR()">📲 Check-in QR</button>
         <button class="nav-btn purple"  onclick="abrirCalendario()">▦ Previsiones</button>
     <button class="nav-btn blue" onclick="abrirMetricas()">📊 Métricas</button>
         <button class="nav-btn blue"    onclick="abrirReporte()">≡ Histórico</button>
@@ -1564,9 +1582,10 @@ function finalizarAsignacionMuelle() {
         id:Date.now(), proyecto:c.proyecto, agencia:c.agencia, matricula:c.matricula,
         merc:c.merc, tipo:c.tipo, bultos:c.bultos, pallets:c.pallets, kg:c.kg,
         fecha:isoLocal(hoy), mes:isoLocal(hoy).substring(0,7),
-        t_llegada:hoy, t_inicio:null, estado:'espera', comentario:''
+        t_llegada:(c.t_chk?new Date(c.t_chk):hoy), t_inicio:null, estado:'espera', comentario:'', chofer:c.chofer||'', tel:c.tel||''
     };
     dbMuelles[mu].push(camion);
+    if (c.chkKey) chkAssign(c.chkKey, mu);
 
     if (c.origen==='checkin' && c.previsionId) {
         const p = previsiones.find(x=>x.id===c.previsionId);
@@ -2203,9 +2222,10 @@ function configurarNube(){
   showToast(fbUrl?'☁ Nube configurada':'Nube desactivada');
   const r=document.getElementById('room-input').value.trim(); if(r) entrarSala();
 }
-function cloudStop(){ if(_es){ _es.close(); _es=null; } }
+function cloudStop(){ if(_es){ _es.close(); _es=null; } if(window.chkStop) chkStop(); }
 const _core=o=>JSON.stringify([o.dbMuelles,o.historico,o.previsiones,o.habituales||[],o.borrados||[]]);
 function cloudStart(sala){
+  if(window.chkStart) chkStart(sala);
   uiSala('☁ Conectando…',false);
   _es=new EventSource(`${fbUrl}/salas/${sala}.json`);
   _es.addEventListener('put',e=>{
@@ -2256,7 +2276,7 @@ renderPizarra();
 if (autoGenerarHabituales()) broadcastState();
 // Auto-reconectar a la sala guardada
 const _salaGuardada = localStorage.getItem(LS_SALA);
-if (_salaGuardada) {
+if (_salaGuardada && !window.__DRV) {
     document.getElementById('room-input').value = _salaGuardada;
     // Pequeño delay para que el DOM esté listo
     setTimeout(() => entrarSala(), 300);
@@ -2341,6 +2361,88 @@ addEventListener('resize',f);addEventListener('orientationchange',f);addEventLis
   function sync(){ c.querySelector('span').textContent=(src.textContent||'').trim()||'Sin sala'; c.classList.toggle('on',st.classList.contains('connected')); }
   new MutationObserver(sync).observe(src,{childList:true,characterData:true,subtree:true}); new MutationObserver(sync).observe(st,{attributes:true}); sync();
 })();
+</script>
+<script>
+/* ===== CHECK-IN POR QR (chófer → ventanilla) ===== */
+(function(){
+const Q=new URLSearchParams(location.search);
+let _chk={},_ce=null,_first=true;
+function beep(){try{const a=new(window.AudioContext||webkitAudioContext)(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();a.close()},250)}catch(e){}}
+function chkApply(path,data,merge){const p=path.split('/').filter(Boolean);
+ if(!p.length){if(merge)Object.assign(_chk,data||{});else _chk=data||{};return}
+ if(p.length==1){if(data===null)delete _chk[p[0]];else if(merge)_chk[p[0]]=Object.assign(_chk[p[0]]||{},data);else _chk[p[0]]=data;return}
+ const o=_chk[p[0]]=_chk[p[0]]||{};if(data===null)delete o[p[1]];else o[p[1]]=data}
+/* --- lado ventanilla --- */
+window.chkStop=function(){if(_ce){_ce.close();_ce=null}_chk={};chkRender()};
+window.chkStart=function(sala){chkStop();if(!fbUrl||window.__DRV)return;_first=true;
+ _ce=new EventSource(`${fbUrl}/chk/${encodeURIComponent(sala)}.json`);
+ const h=(e,merge)=>{let m;try{m=JSON.parse(e.data)}catch(_){return}const antes=Object.keys(_chk);chkApply(m.path,m.data,merge);
+  const nw=Object.keys(_chk).filter(k=>!antes.includes(k)&&_chk[k]&&!_chk[k].muelle);
+  if(!_first&&nw.length){beep();showToast('📲 Llegada: '+nw.map(k=>_chk[k].matricula).join(', '))}_first=false;
+  Object.entries(_chk).forEach(([k,v])=>{if(v&&v.t&&Date.now()-v.t>648e5)fetch(`${fbUrl}/chk/${encodeURIComponent(sala)}/${k}.json`,{method:'DELETE'}).catch(()=>{})});chkRender()};
+ _ce.addEventListener('put',e=>h(e,false));_ce.addEventListener('patch',e=>h(e,true))};
+function chkPC(k){const v=_chk[k];return{origen:'chk',chkKey:k,t_chk:v.t,previsionId:null,proyecto:v.proyecto,agencia:v.agencia||'S/A',matricula:(v.matricula||'S/M').toUpperCase(),merc:(v.merc||'').toUpperCase(),tipo:v.tipo||'DESCARGA',bultos:+v.bultos||0,pallets:+v.pallets||0,kg:+v.kg||0,chofer:v.chofer||'',tel:v.tel||''}}
+window.chkGo=(k,m)=>{if(!_chk[k])return;pendingCamion=chkPC(k);document.getElementById('inbound-muelle').value=String(m);finalizarAsignacionMuelle()};
+window.chkInb=k=>{if(!_chk[k])return;pendingCamion=chkPC(k);abrirInbound()};
+window.chkDel=k=>{if(confirm('¿Descartar esta llegada?'))fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${k}.json`,{method:'DELETE'}).catch(()=>{})};
+window.chkAssign=(k,mu)=>{fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${k}.json`,{method:'PATCH',body:JSON.stringify({muelle:mu,ta:Date.now()})}).catch(()=>{})};
+function chkRender(){if(window.__DRV)return;let t=document.getElementById('chk-tray');
+ if(!t){document.body.insertAdjacentHTML('beforeend','<div id="chk-tray"></div>');t=document.getElementById('chk-tray')}
+ const L=Object.entries(_chk).filter(([k,v])=>v&&v.matricula&&!v.muelle).sort((a,b)=>a[1].t-b[1].t),min=t.classList.contains('min');
+ t.style.display=L.length?'block':'none';
+ t.innerHTML=`<div class="chk-h" onclick="document.getElementById('chk-tray').classList.toggle('min')">📥 Llegadas sin asignar <b>${L.length}</b></div>`+L.map(([k,v])=>`<div class="chk-c"><div class="chk-m">${esc(v.matricula)}</div><div class="chk-s">${esc(v.proyecto)} · ${esc(v.agencia)} · ${v.tipo=='CARGA'?'↑ Carga':'↓ Descarga'}<br>${v.bultos||0} bultos · ${v.pallets||0} pallets · ${v.kg||0} kg${v.merc?' · '+esc(v.merc):''}${v.chofer?'<br>👤 '+esc(v.chofer)+(v.tel?' · <a href="tel:'+esc(v.tel)+'">'+esc(v.tel)+'</a>':''):''}<br><i>hace <span data-chk="${v.t}"></span></i></div><div class="chk-b">${MUELLES.map(m=>`<button onclick="chkGo('${k}',${m})">${m==5?'PT':'0'+m}</button>`).join('')}<button class="s" onclick="chkInb('${k}')">🏷</button><button class="s" onclick="chkDel('${k}')">✕</button></div></div>`).join('');
+ if(min)t.classList.add('min');chkTick()}
+function chkTick(){document.querySelectorAll('[data-chk]').forEach(e=>e.textContent=Math.max(0,Math.round((Date.now()-e.dataset.chk)/6e4))+' min')}
+setInterval(chkTick,20000);
+window.chkCartel=function(){if(!fbUrl||!salaActiva||!window.QRCode)return showToast('⚠ QR no disponible');const u=chkUrl(0);
+ const d=document.createElement('div');new QRCode(d,{text:u,width:640,height:640,correctLevel:QRCode.CorrectLevel.L});
+ const cv=d.querySelector('canvas'),src=cv?cv.toDataURL('image/png'):(d.querySelector('img')||{}).src;
+ const L=[['Registra tu llegada','Escanea el QR con la cámara del móvil','Rellena matrícula, pallets y datos','Espera en tu vehículo: te avisaremos del muelle'],
+ ['Register your arrival','Scan the QR code with your phone camera','Fill in plate number, pallets and details','Wait in your vehicle: we will tell you your dock'],
+ ['Registe a sua chegada','Leia o QR com a câmara do telemóvel','Preencha matrícula, paletes e dados','Aguarde no veículo: indicaremos o seu cais'],
+ ['Enregistrez votre arrivée','Scannez le QR avec l’appareil photo','Remplissez plaque, palettes et données','Attendez dans votre véhicule : nous vous indiquerons le quai']];
+ const w=window.open('','_blank','width=800,height=1000');if(!w)return showToast('⚠ Permite ventanas emergentes para imprimir');
+ w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cartel Check-in</title><style>@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0;width:210mm;height:296mm;overflow:hidden}body{font-family:Arial,Helvetica,sans-serif;color:#0b2038}.p{width:210mm;height:296mm;padding:10mm 12mm;overflow:hidden;display:flex;flex-direction:column;align-items:center}.top{width:100%;display:flex;justify-content:space-between;align-items:center;border-bottom:3mm solid #ff7a1a;padding-bottom:4mm}.lg{font-weight:900;font-size:22pt}.lg b{background:#ff7a1a;color:#fff;padding:0 8px;border-radius:6px;margin-right:8px}.sb{font-size:11pt;color:#5a7189}h1{font-size:32pt;margin:5mm 0 1mm;text-align:center;line-height:1.05}h2{font-size:14pt;margin:0 0 4mm;color:#5a7189;text-align:center;font-weight:600}.qr{border:2.5mm solid #0b2038;border-radius:5mm;padding:4mm;background:#fff}.qr img{width:105mm;height:105mm;display:block}.g{display:grid;grid-template-columns:1fr 1fr;gap:4mm 6mm;width:100%;margin-top:6mm}.c{border:.5mm solid #c4d3e3;border-radius:4mm;padding:3mm 4mm}.c h3{margin:0 0 2mm;font-size:12pt;color:#ff7a1a}.c ol{margin:0;padding-left:5mm;font-size:9.5pt;line-height:1.4}</style></head><body><div class="p"><div class="top"><div class="lg"><b>Y</b>Yusen Logistics</div><div class="sb">Control de Muelles · Barcelona</div></div><h1>${L[0][0]}<br><span style="color:#ff7a1a;font-size:22pt">${L[1][0]}</span></h1><h2>${L[2][0]} · ${L[3][0]}</h2><div class="qr"><img src="${src}"></div><div class="g">${L.map(x=>`<div class="c"><h3>${x[0]}</h3><ol><li>${x[1]}</li><li>${x[2]}</li><li>${x[3]}</li></ol></div>`).join('')}</div></div></body></html>`);
+ w.document.close();setTimeout(()=>w.print(),500)};
+function chkUrl(exp){return location.href.split('#')[0].split('?')[0]+'?chk='+encodeURIComponent(salaActiva)+'&fb='+encodeURIComponent(fbUrl)+(exp?'&e='+exp:'')}
+let _chkE=0;
+function chkQRdraw(){const m=document.getElementById('modal-chkqr');if(!m||!m.classList.contains('open')){clearInterval(window._chkT);_chkE=0;return}
+ if(Date.now()>=_chkE){_chkE=Date.now()+3e5;const u=chkUrl(_chkE),el=document.getElementById('chk-qr');el.innerHTML='';document.getElementById('chk-url').textContent=u;
+  if(window.QRCode)new QRCode(el,{text:u,width:280,height:280,correctLevel:QRCode.CorrectLevel.L});else el.textContent='QR no disponible: usa el enlace'}
+ const s=Math.max(0,Math.round((_chkE-Date.now())/1e3));document.getElementById('chk-cd').textContent='⏱ Este QR caduca en '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' (se renueva solo)'}
+window.chkQR=function(){if(!fbUrl||!salaActiva)return showToast('⚠ Entra en una sala y activa la ☁ Nube para usar el check-in');
+ if(!/^https?:$/.test(location.protocol))return showToast('⚠ Abre la app desde su dirección web (https://…), no desde el archivo: así el QR no funciona en el móvil');
+ if(!document.getElementById('modal-chkqr'))document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-chkqr"><div class="modal-box" style="max-width:380px;text-align:center"><div class="modal-header"><div class="modal-title-w"><div class="modal-icon">📲</div><div class="modal-title">Check-in <em>chófer</em></div></div><button class="btn-close" onclick="closeModal('modal-chkqr')">✕</button></div><div id="chk-qr" style="background:#fff;padding:16px;border-radius:12px;display:inline-block"></div><p id="chk-cd" style="font-weight:700;color:var(--orange);margin-top:10px"></p><p id="chk-url" style="font-size:11px;color:var(--text2);word-break:break-all;margin:12px 0"></p><button class="btn-submit" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('chk-url').textContent);showToast('Enlace copiado')">Copiar enlace</button><button class="btn-submit" style="background:linear-gradient(135deg,var(--blue),#2563eb)" onclick="chkCartel()">🖨 Cartel A4 (4 idiomas)</button><button class="btn-cancel" onclick="closeModal('modal-chkqr')">Cerrar</button></div></div>`);
+ _chkE=0;openModal('modal-chkqr');chkQRdraw();clearInterval(window._chkT);window._chkT=setInterval(chkQRdraw,1e3)};
+/* --- lado chófer (móvil) --- */
+if(!window.__DRV)return;
+const sala=Q.get('chk'),fb=(Q.get('fb')||'').replace(/\/+$/,''),EXP=+Q.get('e')||0,WIN=3e5,MAXR=3,T0=(()=>{let v=+sessionStorage.getItem('yb_s_'+sala);if(!v){v=Date.now();sessionStorage.setItem('yb_s_'+sala,v)}return v})(),stale=EXP&&T0>EXP,dead=()=>Date.now()>T0+WIN,root=document.createElement('div');root.id='drv';document.body.appendChild(root);
+const K='t cli op d c ag mat merc b p kg nm tel go ok wait pass again exp tmo'.split(' '),
+TR={es:['Check-in de llegada','Cliente','Operación','↓ Descarga','↑ Carga','Agencia / Transportista','Matrícula','Pedido / Referencia / Mercancía','Bultos','Pallets','Peso (Kg)','Tu nombre (opcional)','Teléfono (opcional)','Registrar llegada','Llegada registrada. Espera indicaciones en ventanilla.','En espera de muelle…','Pase al muelle','Nuevo registro','QR caducado. Escanea de nuevo el código del muelle.','Tiempo agotado (5 min). Escanea de nuevo el QR para registrar otra llegada.'],
+en:['Arrival check-in','Client','Operation','↓ Unloading','↑ Loading','Carrier','Plate number','Order / Reference / Goods','Parcels','Pallets','Weight (Kg)','Your name (optional)','Phone (optional)','Register arrival','Arrival registered. Wait for instructions at the office.','Waiting for a dock…','Proceed to dock','New check-in','QR expired. Scan the code at the dock again.','Time is up (5 min). Scan the QR again to register another arrival.'],
+pt:['Check-in de chegada','Cliente','Operação','↓ Descarga','↑ Carga','Transportadora','Matrícula','Pedido / Referência / Mercadoria','Volumes','Paletes','Peso (Kg)','O seu nome (opcional)','Telefone (opcional)','Registar chegada','Chegada registada. Aguarde instruções no escritório.','A aguardar cais…','Dirija-se ao cais','Novo registo','QR expirado. Leia novamente o código no cais.','Tempo esgotado (5 min). Leia novamente o QR para registar outra chegada.'],
+fr:['Enregistrement d’arrivée','Client','Opération','↓ Déchargement','↑ Chargement','Transporteur','Plaque','Commande / Référence / Marchandise','Colis','Palettes','Poids (Kg)','Votre nom (optionnel)','Téléphone (optionnel)','Enregistrer l’arrivée','Arrivée enregistrée. Attendez les instructions au bureau.','En attente d’un quai…','Présentez-vous au quai','Nouvel enregistrement','QR expiré. Scannez à nouveau le code au quai.','Temps écoulé (5 min). Scannez à nouveau le QR pour enregistrer une autre arrivée.']};
+const S=window.DV={lang:(navigator.language||'es').slice(0,2),cli:LISTA_PROYECTOS[0],tipo:'DESCARGA',ag:localStorage.getItem('yb_ag')||'',mat:'',merc:'',b:'',p:'',kg:'',nm:localStorage.getItem('yb_nm')||'',tel:localStorage.getItem('yb_tel')||'',key:localStorage.getItem('yb_chk_'+sala),st:null};if(!TR[S.lang])S.lang='es';
+const T=k=>TR[S.lang][K.indexOf(k)],fld=(k,l,x='')=>`<label>${l}</label><input value="${esc(S[k])}" oninput="DV.${k}=this.value" ${x}>`;
+function draw(){const lg=Object.keys(TR).map(l=>`<button class="${l==S.lang?'on':''}" onclick="DV.lang='${l}';dvDraw()">${l.toUpperCase()}</button>`).join('');let h;
+ if(S.key){const s=S.st||{};h=`<div class="dc"><div class="pl">${esc(s.matricula||'')}</div>${s.muelle?`<div class="go">${T('pass')}</div><div class="bg">${s.muelle==5?'PT':'0'+s.muelle}</div>`:`<p>${T('ok')}</p><p>${T('wait')}</p>`}${dead()||S.n>=MAXR?'':`<button class="bt" onclick="dvNew()">${T('again')}</button>`}</div>`}
+ else if(stale||dead())h=`<div class="dc"><p style="font-size:20px;line-height:1.4">⏱ ${T(stale?'exp':'tmo')}</p></div>`
+ else h=`<h1>${T('t')}</h1><label>${T('cli')}</label><select onchange="DV.cli=this.value">${LISTA_PROYECTOS.map(c=>`<option ${c==S.cli?'selected':''}>${esc(c)}</option>`).join('')}</select><label>${T('op')}</label><div class="sg"><button class="${S.tipo=='DESCARGA'?'on':''}" onclick="DV.tipo='DESCARGA';dvDraw()">${T('d')}</button><button class="${S.tipo=='CARGA'?'on':''}" onclick="DV.tipo='CARGA';dvDraw()">${T('c')}</button></div>${fld('ag',T('ag'))}${fld('mat',T('mat'),'style="font-size:26px;font-weight:800;text-align:center;text-transform:uppercase" autocapitalize=characters autocomplete=off')}${fld('merc',T('merc'))}<div class="g3"><div>${fld('b',T('b'),'type=number inputmode=numeric')}</div><div>${fld('p',T('p'),'type=number inputmode=numeric')}</div><div>${fld('kg',T('kg'),'type=number inputmode=decimal')}</div></div>${fld('nm',T('nm'))}${fld('tel',T('tel'),'type=tel inputmode=tel')}<button class="bt" onclick="dvGo()">${T('go')}</button>`;
+ root.innerHTML=`<div class="lg">${lg}</div>`+h}
+window.dvDraw=draw;
+window.dvGo=async()=>{if(stale||dead()||S.n>=MAXR)return draw();if(!S.mat.trim()||!S.ag.trim())return alert('Matrícula y agencia / Plate and carrier');
+ const o={t:Date.now(),proyecto:S.cli,tipo:S.tipo,agencia:S.ag.trim(),matricula:S.mat.trim().toUpperCase(),merc:S.merc.trim(),bultos:+S.b||0,pallets:+S.p||0,kg:+S.kg||0,chofer:S.nm.trim(),tel:S.tel.trim()};
+ try{const r=await fetch(`${fb}/chk/${encodeURIComponent(sala)}.json`,{method:'POST',body:JSON.stringify(o)});if(!r.ok)throw 0;S.key=(await r.json()).name;S.st=o;S.n=(S.n||0)+1;['ag','nm','tel'].forEach(k=>localStorage.setItem('yb_'+k,S[k]));localStorage.setItem('yb_chk_'+sala,S.key);watch();draw()}catch(e){alert('No se pudo enviar / Could not send')}};
+window.dvNew=()=>{localStorage.removeItem('yb_chk_'+sala);S.key=null;S.st=null;S.mat='';S.merc='';S.b=S.p=S.kg='';if(S.es){S.es.close();S.es=null}draw()};
+function watch(){if(S.es)S.es.close();S.es=new EventSource(`${fb}/chk/${encodeURIComponent(sala)}/${S.key}.json`);
+ const h=(e,m)=>{let x;try{x=JSON.parse(e.data)}catch(_){return}const had=S.st&&S.st.muelle;
+  if(x.path=='/'){if(x.data===null&&!m){if(S.st&&S.st.t){/* aún no creado */}return}S.st=m?Object.assign(S.st||{},x.data):x.data}else S.st=Object.assign(S.st||{},{[x.path.slice(1)]:x.data});
+  if(S.st&&S.st.muelle&&!had){beep();navigator.vibrate&&navigator.vibrate([300,150,300])}draw()};
+ S.es.addEventListener('put',e=>h(e,false));S.es.addEventListener('patch',e=>h(e,true))}
+draw();if(S.key)watch();
+let _d=0;setInterval(()=>{if(dead()&&!_d){_d=1;draw()}},3e3);
+})();
+
 </script>
 </body>
 </html>

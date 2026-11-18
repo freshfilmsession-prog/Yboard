@@ -2394,13 +2394,15 @@ window.chkGo=(k,m)=>{if(!_chk[k])return;pendingCamion=chkPC(k);document.getEleme
 window.chkInb=k=>{if(!_chk[k])return;pendingCamion=chkPC(k);abrirInbound()};
 window.chkDel=k=>{if(confirm('¿Descartar esta llegada?'))fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${k}.json`,{method:'DELETE'}).catch(()=>{})};
 const _cs={};
+const _nz=x=>String(x||'').toUpperCase().replace(/[^A-Z0-9]/g,''),_link=c=>{if(c.chkKey)return true;const n=_nz(c.matricula);if(n.length<4)return false;
+ let k=null;Object.entries(_chk).forEach(([kk,v])=>{if(v&&v.matricula&&_nz(v.matricula)===n)k=kk});if(k)c.chkKey=k;return !!k};
 window.chkSyncQueue=function(){if(window.__DRV||!fbUrl||!salaActiva)return;
- MUELLES.forEach(m=>(dbMuelles[m]||[]).forEach((c,i)=>{if(!c.chkKey)return;
+ MUELLES.forEach(m=>(dbMuelles[m]||[]).forEach((c,i)=>{if(!_link(c))return;
   const a=i>0?dbMuelles[m][i-1]:null,d={muelle:m,pos:i,am:a?a.matricula:'',an:a?(a.chofer||''):'',ta:c.id,ps:c.estado==='proceso'?'proc':'wait'},sig=JSON.stringify(d);
   if(_cs[c.chkKey]===sig)return;_cs[c.chkKey]=sig;
   fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${c.chkKey}.json`,{method:'PATCH',body:JSON.stringify(d)}).then(r=>{if(!r.ok)delete _cs[c.chkKey]}).catch(()=>{delete _cs[c.chkKey]})}))};
 const _syncFin=()=>{if(window.__DRV||!fbUrl||!salaActiva)return;
- (historico||[]).forEach(h=>{if(!h.chkKey||!h.t_fin||Date.now()-new Date(h.t_fin)>216e5)return;
+ (historico||[]).forEach(h=>{if(!h.t_fin||Date.now()-new Date(h.t_fin)>216e5||!_link(h))return;
   const d={ps:'fin',pos:0,muelle:h.muelle||0},k='F'+h.chkKey;if(_cs[k])return;_cs[k]=1;
   fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${h.chkKey}.json`,{method:'PATCH',body:JSON.stringify(d)}).then(r=>{if(!r.ok)delete _cs[k]}).catch(()=>{delete _cs[k]})})};
 window.chkAssign=()=>chkSyncQueue();

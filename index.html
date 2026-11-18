@@ -2381,6 +2381,14 @@ window.chkStart=function(sala){chkStop();if(!fbUrl||window.__DRV)return;_first=t
   if(!_first&&nw.length){beep();showToast('📲 Llegada: '+nw.map(k=>_chk[k].matricula).join(', '))}_first=false;
   Object.entries(_chk).forEach(([k,v])=>{if(v&&v.t&&Date.now()-v.t>648e5)fetch(`${fbUrl}/chk/${encodeURIComponent(sala)}/${k}.json`,{method:'DELETE'}).catch(()=>{})});chkRender()};
  _ce.addEventListener('put',e=>h(e,false));_ce.addEventListener('patch',e=>h(e,true))};
+/* respaldo: consulta cada 5 s por si el canal en vivo (EventSource) lo bloquea la red/proxy de la oficina */
+let _pf=true,_pw=false;
+setInterval(async()=>{if(window.__DRV||!fbUrl||!salaActiva)return;
+ try{const r=await fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}.json`);
+  if(!r.ok){if(!_pw){_pw=true;showToast('⚠ Check-in: Firebase no deja leer (error '+r.status+'). Revisa las reglas')}return}
+  _pw=false;const d=await r.json()||{},antes=Object.keys(_chk);_chk=d;
+  const nw=Object.keys(_chk).filter(k=>!antes.includes(k)&&_chk[k]&&!_chk[k].muelle);
+  if(!_pf&&nw.length){beep();showToast('📲 Llegada: '+nw.map(k=>_chk[k].matricula).join(', '))}_pf=false;chkRender()}catch(e){}},5000);
 function chkPC(k){const v=_chk[k];return{origen:'chk',chkKey:k,t_chk:v.t,previsionId:null,proyecto:v.proyecto,agencia:v.agencia||'S/A',matricula:(v.matricula||'S/M').toUpperCase(),merc:(v.merc||'').toUpperCase(),tipo:v.tipo||'DESCARGA',bultos:+v.bultos||0,pallets:+v.pallets||0,kg:+v.kg||0,chofer:v.chofer||'',tel:v.tel||''}}
 window.chkGo=(k,m)=>{if(!_chk[k])return;pendingCamion=chkPC(k);document.getElementById('inbound-muelle').value=String(m);finalizarAsignacionMuelle()};
 window.chkInb=k=>{if(!_chk[k])return;pendingCamion=chkPC(k);abrirInbound()};
@@ -2432,7 +2440,7 @@ function draw(){const lg=Object.keys(TR).map(l=>`<button class="${l==S.lang?'on'
 window.dvDraw=draw;
 window.dvGo=async()=>{if(stale||dead()||S.n>=MAXR)return draw();if(!S.mat.trim()||!S.ag.trim())return alert('Matrícula y agencia / Plate and carrier');
  const o={t:Date.now(),proyecto:S.cli,tipo:S.tipo,agencia:S.ag.trim(),matricula:S.mat.trim().toUpperCase(),merc:S.merc.trim(),bultos:+S.b||0,pallets:+S.p||0,kg:+S.kg||0,chofer:S.nm.trim(),tel:S.tel.trim()};
- try{const r=await fetch(`${fb}/chk/${encodeURIComponent(sala)}.json`,{method:'POST',body:JSON.stringify(o)});if(!r.ok)throw 0;S.key=(await r.json()).name;S.st=o;S.n=(S.n||0)+1;['ag','nm','tel'].forEach(k=>localStorage.setItem('yb_'+k,S[k]));localStorage.setItem('yb_chk_'+sala,S.key);watch();draw()}catch(e){alert('No se pudo enviar / Could not send')}};
+ try{const r=await fetch(`${fb}/chk/${encodeURIComponent(sala)}.json`,{method:'POST',body:JSON.stringify(o)});if(!r.ok)throw new Error('HTTP '+r.status);S.key=(await r.json()).name;S.st=o;S.n=(S.n||0)+1;['ag','nm','tel'].forEach(k=>localStorage.setItem('yb_'+k,S[k]));localStorage.setItem('yb_chk_'+sala,S.key);watch();draw()}catch(e){alert('No se pudo enviar / Could not send ('+(e&&e.message?e.message:e)+')')}};
 window.dvNew=()=>{localStorage.removeItem('yb_chk_'+sala);S.key=null;S.st=null;S.mat='';S.merc='';S.b=S.p=S.kg='';if(S.es){S.es.close();S.es=null}draw()};
 function watch(){if(S.es)S.es.close();S.es=new EventSource(`${fb}/chk/${encodeURIComponent(sala)}/${S.key}.json`);
  const h=(e,m)=>{let x;try{x=JSON.parse(e.data)}catch(_){return}const had=S.st&&S.st.muelle;

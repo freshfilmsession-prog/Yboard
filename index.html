@@ -1059,7 +1059,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 const MUELLES = [2,3,4,5]; // 5 = Pasillo trasero
 const nomMu = m => m == 5 ? 'Pasillo trasero' : 'Muelle 0' + m;
-const LISTA_PROYECTOS = ["BITRON","REBOUND","NWT","CBC","SIT&B","TOYOTA","VANTAX","SHIMA SEIKI","OTROS"];
+const LISTA_PROYECTOS = ["BITRON","BITRON CAMION DIARIO","REBOUND","NWT","CBC","SIT&B","TOYOTA","VANTAX","SHIMA SEIKI","OTROS"];
 let dbMuelles = { 2:[], 3:[], 4:[], 5:[] };
 let feedbacks = [], historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2768,7 +2768,7 @@ window.cgSkip=function(){const c=truck(); if(!c) return; c.sinCarta=true; closeM
 
 finalizar=function(m){
   const c=dbMuelles[m][0];
-  if(c&&c.proyecto==='BITRON'&&c.tipo==='CARGA'&&!c.carga&&!c.sinCarta){abrirCarga(m);return;}
+  if(c&&c.proyecto==='BITRON CAMION DIARIO'&&!c.carga&&!c.sinCarta){abrirCarga(m);return;}
   _fin2(m);
 };
 
@@ -2787,7 +2787,7 @@ const _rp=renderPizarra;
 renderPizarra=function(){
   _rp.apply(this,arguments);
   MUELLES.forEach(m=>{const c=dbMuelles[m][0],t=document.querySelector('#active-'+m+' .ctools');
-    if(c&&c.proyecto==='BITRON'&&t&&!t.querySelector('.cg-btn')) t.insertAdjacentHTML('beforeend','<button class="cg-btn" onclick="abrirCarga('+m+')">⚖ Carga Bitron'+(c.carga?' ✓ '+nf(c.carga.kg)+' kg':'')+'</button>');});
+    if(c&&c.proyecto==='BITRON CAMION DIARIO'&&t&&!t.querySelector('.cg-btn')) t.insertAdjacentHTML('beforeend','<button class="cg-btn" onclick="abrirCarga('+m+')">⚖ Carga Bitron'+(c.carga?' ✓ '+nf(c.carga.kg)+' kg':'')+'</button>');});
   cgBar();
 };
 
@@ -2842,4 +2842,4 @@ renderPizarra();
 })();
 </script>
 
-</body></html>                
+</body></html>

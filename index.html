@@ -2680,7 +2680,7 @@ fbBadge();
 </script>
 <!-- ═══ v6: CARGA BITRON + CARTA DE PORTE ═══ -->
 <style>
-#cg-bar{position:fixed;left:12px;bottom:64px;z-index:950;display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100vw - 24px))}
+.cg-dock{padding:8px 10px 0}
 .cg-it{background:linear-gradient(135deg,#ff6600,#cc4400);color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:cgp 1.6s infinite}
 @keyframes cgp{0%,100%{box-shadow:0 0 0 0 rgba(255,102,0,.65),0 10px 30px #000a}50%{box-shadow:0 0 0 12px rgba(255,102,0,0),0 10px 30px #000a}}
 .cg-it .ic{font-size:26px}.cg-it b{display:block;font-size:14px;line-height:1.25}.cg-it small{opacity:.92;font-size:11px}
@@ -2724,7 +2724,7 @@ document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mod
 <button class="btn-cancel" onclick="closeModal('modal-carga')">Cancelar</button></div></div>
 <div class="modal-overlay" id="modal-cartas"><div class="modal-box">
 <div class="modal-header"><div class="modal-title-w"><div class="modal-icon">🖨</div><div class="modal-title">Cartas de <em>porte</em></div></div><button class="btn-close" onclick="closeModal('modal-cartas')">✕</button></div>
-<div id="cg-list"></div></div></div><div id="cg-bar"></div>`);
+<div id="cg-list"></div></div></div>`);
 
 const _fin2=finalizar;
 const truck=()=>{ if(!_cg) return null; const c=dbMuelles[_cg.m][0]; return c&&c.id===_cg.id?c:null; };
@@ -2776,10 +2776,11 @@ finalizar=function(m){
 let _sig='', _seen=null;
 function pendientes(){return historico.filter(h=>h.carga&&h.cartaPend);}
 function cgBar(){
-  const P=pendientes(), sig=P.map(h=>h.id).join(',');
+  const P=pendientes(), sig=P.map(h=>h.id+':'+h.muelle).join(',');
   if(sig===_sig) return; _sig=sig;
-  const bar=document.getElementById('cg-bar');
-  bar.innerHTML=P.map(h=>`<div class="cg-it"><span class="ic">🖨</span><div><b>Imprimir albarán de carta de porte</b><small>BITRON · ${esc(h.matricula)} · ${nf(h.carga.kg)} kg · 3 copias</small></div><button onclick="cgPrint(${h.id})">Imprimir</button></div>`).join('');
+  document.querySelectorAll('.cg-dock').forEach(e=>e.remove());
+  P.forEach(h=>{const a=document.getElementById('active-'+(h.muelle||2)); if(!a) return;
+    a.insertAdjacentHTML('beforebegin',`<div class="cg-dock"><div class="cg-it"><span class="ic">🖨</span><div><b>Imprimir albarán de carta de porte</b><small>BITRON CAMION DIARIO · ${esc(h.matricula)} · ${nf(h.carga.kg)} kg · 3 copias</small></div><button onclick="cgPrint(${h.id})">Imprimir</button></div></div>`);});
   if(_seen!==null&&P.some(h=>!_seen.has(h.id))&&typeof beep==='function'){try{beep(2)}catch(_){}}
   _seen=new Set(P.map(h=>h.id));
 }
@@ -2804,7 +2805,7 @@ window.cgPrint=function(id){
   const h=historico.find(x=>x.id===id); if(!h||!h.carga) return showToast('No encuentro esa carga');
   const w=window.open('','_blank'); if(!w) return showToast('⚠ El navegador bloqueó la ventana de impresión');
   w.document.write(cartaHTML(h)); w.document.close();
-  if(h.cartaPend){h.cartaPend=false;h.cartaImp=Date.now();broadcastState();_sig='';cgBar();}
+  if(h.cartaPend){h.cartaPend=false;h.cartaImp=Date.now();broadcastState();_sig='x';cgBar();}
   setTimeout(()=>{try{w.focus();w.print();}catch(_){}},500);
 };
 function cartaHTML(h){

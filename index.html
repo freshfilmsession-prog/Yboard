@@ -2798,7 +2798,7 @@ window.cgList=function(){
   document.getElementById('cg-list').innerHTML=L.length?L.map(h=>`<div class="cg-lst"><div><b>${new Date(h.t_fin).toLocaleDateString('es-ES')} ${fmt(h.t_fin)}</b> · ${esc(h.matricula)}<br><small style="color:var(--text2)">${nf(h.carga.kg)} kg · ${h.carga.units} uds ${h.cartaPend?'· <span style="color:#ff8533">pendiente de imprimir</span>':'· impresa'}</small></div><button class="btn-submit" style="width:auto;padding:8px 14px" onclick="cgPrint(${h.id})">🖨 Imprimir</button></div>`).join(''):'<p style="color:var(--text2)">Todavía no hay cartas de porte.</p>';
   openModal('modal-cartas');
 };
-document.querySelector('.hd-actions').insertAdjacentHTML('beforeend','<button class="nav-btn blue" onclick="cgList()">🖨 Cartas de porte</button>');
+document.querySelector('.admin-bar .admin-right').insertAdjacentHTML('beforebegin','<button class="nav-btn blue" onclick="cgList()" style="margin:0 8px;align-self:center;height:36px;white-space:nowrap;">🖨 Cartas de porte</button>');
 
 /* ── Documento: carta de porte (3 copias A4 apaisado) ── */
 window.cgPrint=function(id){

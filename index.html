@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<!DOCTYPE html><html lang="es" style="--hdr-h: 238px;"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Yusen · Control de Muelles</title>
@@ -741,7 +739,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #drv .dc{text-align:center;margin-top:30px}#drv .pl{display:inline-block;background:#f4f4f0;color:#111;border-left:14px solid #1a3a8a;border-radius:8px;padding:2px 16px;font-size:34px;font-weight:900;letter-spacing:.06em;margin-bottom:20px}#drv .go{font-weight:800;font-size:20px;color:#2ecc71}#drv .bg{font-size:120px;font-weight:900;color:#2ecc71;line-height:1.1}
 
 </style>
-</head>
+<style>#drv .fb{margin:26px auto 0;max-width:420px;background:#10283f;border:1px solid #1d3b58;border-radius:16px;padding:16px;text-align:center}#drv .fbt{font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.3}#drv .fbs{display:flex;justify-content:center;gap:4px;margin-bottom:12px}#drv .fbs button{background:none;border:0;font-size:46px;line-height:1;color:#3b546d;padding:0 2px}#drv .fbs button.on{color:#f59e0b}#drv .fb textarea{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #1d3b58;background:#0b1e36;color:#fff;font-size:16px;padding:10px;font-family:inherit;resize:none}#drv .fb .bt{margin-top:12px;padding:14px;font-size:17px}</style></head>
 <body>
 
 <header>
@@ -765,25 +763,27 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="kpi-sep"></div>
         <div class="kpi-pill green">
             <span class="kpi-icon">✓</span>
-            <div><div class="kpi-val" id="kpi-hoy">0</div><div class="kpi-label">Finalizados hoy</div></div>
+            <div><div class="kpi-val" id="kpi-hoy">44</div><div class="kpi-label">Finalizados hoy</div></div>
         </div>
         <div class="kpi-sep"></div>
         <div class="kpi-pill blue">
             <span class="kpi-icon">📋</span>
-            <div><div class="kpi-val" id="kpi-prev">0</div><div class="kpi-label">Previsiones hoy</div></div>
+            <div><div class="kpi-val" id="kpi-prev">7</div><div class="kpi-label">Previsiones hoy</div></div>
         </div>
     </div>
     <div class="hd-center">
         <div class="live-badge"><div class="live-dot"></div>En Vivo</div>
-        <div class="date-txt" id="fecha-txt"></div>
-        <div class="clock" id="reloj">00:00:00</div>
-    </div>
+        <div class="date-txt" id="fecha-txt">miércoles, 18 de noviembre de 2026</div>
+        <div class="clock" id="reloj">17:16:29</div>
+    <button id="sync-chip" type="button" class="on"><i></i><span>☁ Sala: KK123</span></button></div>
     <div class="hd-actions">
         <button class="nav-btn primary" onclick="openModal('modal-add')">＋ Nueva Llegada</button>
         <button class="nav-btn" onclick="chkQR()">📲 Check-in QR</button>
-        <button class="nav-btn purple"  onclick="abrirCalendario()">▦ Previsiones</button>
+        <button class="nav-btn purple" onclick="abrirCalendario()">▦ Previsiones</button>
+    <button class="nav-btn blue" id="btn-fb" onclick="abrirFb()">⭐ Feedback</button>
+    <button class="nav-btn blue" onclick="abrirKPI()">📈 KPI</button>
     <button class="nav-btn blue" onclick="abrirMetricas()">📊 Métricas</button>
-        <button class="nav-btn blue"    onclick="abrirReporte()">≡ Histórico</button>
+        <button class="nav-btn blue" onclick="abrirReporte()">≡ Histórico</button>
     </div>
 </header>
 
@@ -796,13 +796,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             </div>
             <span class="dock-badge badge-free" id="badge-2">Libre</span>
         </div>
-        <div id="active-2" class="slot-active"></div>
+        <div id="active-2" class="slot-active"><div class="slot-empty"><div class="slot-empty-icon">◻</div><div class="slot-empty-txt">Muelle disponible</div></div></div>
         <div class="queue-section">
             <div class="queue-header-bar">
                 <div class="queue-label">Cola de espera</div>
                 <div class="queue-count" id="qc-2">0</div>
             </div>
-            <div class="queue-list" id="lista-2"></div>
+            <div class="queue-list" id="lista-2"><div class="queue-empty">Sin pendientes</div></div>
         </div>
     </div>
     <div class="dock-col" data-muelle="3" ondragover="allowDrop(event)" ondrop="handleDrop(event,3)" id="col-3">
@@ -813,13 +813,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             </div>
             <span class="dock-badge badge-free" id="badge-3">Libre</span>
         </div>
-        <div id="active-3" class="slot-active"></div>
+        <div id="active-3" class="slot-active"><div class="slot-empty"><div class="slot-empty-icon">◻</div><div class="slot-empty-txt">Muelle disponible</div></div></div>
         <div class="queue-section">
             <div class="queue-header-bar">
                 <div class="queue-label">Cola de espera</div>
                 <div class="queue-count" id="qc-3">0</div>
             </div>
-            <div class="queue-list" id="lista-3"></div>
+            <div class="queue-list" id="lista-3"><div class="queue-empty">Sin pendientes</div></div>
         </div>
     </div>
     <div class="dock-col" data-muelle="4" ondragover="allowDrop(event)" ondrop="handleDrop(event,4)" id="col-4">
@@ -830,13 +830,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             </div>
             <span class="dock-badge badge-free" id="badge-4">Libre</span>
         </div>
-        <div id="active-4" class="slot-active"></div>
+        <div id="active-4" class="slot-active"><div class="slot-empty"><div class="slot-empty-icon">◻</div><div class="slot-empty-txt">Muelle disponible</div></div></div>
         <div class="queue-section">
             <div class="queue-header-bar">
                 <div class="queue-label">Cola de espera</div>
                 <div class="queue-count" id="qc-4">0</div>
             </div>
-            <div class="queue-list" id="lista-4"></div>
+            <div class="queue-list" id="lista-4"><div class="queue-empty">Sin pendientes</div></div>
         </div>
     </div>
     <div class="dock-col" data-muelle="5" ondragover="allowDrop(event)" ondrop="handleDrop(event,5)" id="col-5">
@@ -847,23 +847,23 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             </div>
             <span class="dock-badge badge-free" id="badge-5">Libre</span>
         </div>
-        <div id="active-5" class="slot-active"></div>
+        <div id="active-5" class="slot-active"><div class="slot-empty"><div class="slot-empty-icon">◻</div><div class="slot-empty-txt">Muelle disponible</div></div></div>
         <div class="queue-section">
             <div class="queue-header-bar">
                 <div class="queue-label">Furgonetas · carga lateral</div>
                 <div class="queue-count" id="qc-5">0</div>
             </div>
-            <div class="queue-list" id="lista-5"></div>
+            <div class="queue-list" id="lista-5"><div class="queue-empty">Sin pendientes</div></div>
         </div>
     </div>
 </div>
 
 <div class="admin-bar">
     <div class="peer-widget">
-        <div class="status-dot" id="peer-status"></div>
+        <div class="status-dot connected" id="peer-status"></div>
         <div class="peer-info">
             <div class="peer-lbl" id="peer-lbl-txt">Sala compartida</div>
-            <div class="peer-id" id="my-peer-id">Sin sala</div>
+            <div class="peer-id" id="my-peer-id">☁ Sala: KK123</div>
         </div>
         <div class="peer-row">
             <input type="text" class="peer-input" id="room-input" placeholder="Código sala ej: BCN01" maxlength="20" style="text-transform:uppercase;">
@@ -878,11 +878,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </div>
 </div>
 
-<div id="toast"><div class="toast-bar"></div><span id="toast-msg"></span></div>
+<div id="toast" class=""><div class="toast-bar"></div><span id="toast-msg">Estado anterior cargado automáticamente</span></div>
 
 <div class="modal-overlay" id="modal-add">
     <div class="modal-box">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w">
                 <div class="modal-icon">🚛</div>
                 <div class="modal-title">Registrar <em>Nueva Llegada</em></div>
@@ -890,7 +890,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <button class="btn-close" onclick="closeModal('modal-add')">✕</button>
         </div>
         <div class="form-grid">
-            <div class="form-group"><label class="form-label">Cliente</label><select id="in-proyecto" class="form-select selector-proyectos"></select></div>
+            <div class="form-group"><label class="form-label">Cliente</label><select id="in-proyecto" class="form-select selector-proyectos"><option value="BITRON">BITRON</option><option value="REBOUND">REBOUND</option><option value="NWT">NWT</option><option value="CBC">CBC</option><option value="SIT&amp;B">SIT&amp;B</option><option value="TOYOTA">TOYOTA</option><option value="VANTAX">VANTAX</option><option value="SHIMA SEIKI">SHIMA SEIKI</option><option value="OTROS">OTROS</option></select></div>
             <div class="form-group"><label class="form-label">Tipo de Operación</label><select id="in-tipo" class="form-select"><option value="DESCARGA">↓ Descarga</option><option value="CARGA">↑ Carga</option></select></div>
             <div class="form-group"><label class="form-label">Agencia / Transportista</label><input type="text" id="in-agencia" class="form-input" placeholder="DHL, TNT, SEUR…"></div>
             <div class="form-group"><label class="form-label">Matrícula</label><input type="text" id="in-mat" class="form-input" placeholder="1234 ABC"></div>
@@ -906,7 +906,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-checkin">
     <div class="modal-box" style="max-width:380px;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w">
                 <div class="modal-icon">✅</div>
                 <div class="modal-title">Check-in <em>Previsión</em></div>
@@ -927,7 +927,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-inbound">
     <div class="modal-box" style="max-width:460px;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w">
                 <div class="modal-icon">🏷️</div>
                 <div class="modal-title">Inbound <em>· Etiquetas y Hoja</em></div>
@@ -950,7 +950,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-calendario">
     <div class="modal-box wide" style="height:90vh;display:flex;flex-direction:column;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w">
                 <div class="modal-icon">▦</div>
                 <div class="modal-title"><em id="cal-form-title">Añadir</em> Previsión Semanal</div>
@@ -963,7 +963,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="pre-fecha" class="form-input"></div>
             <div class="form-group"><label class="form-label">Hora</label><input type="time" id="pre-hora" class="form-input"></div>
             <div class="form-group"><label class="form-label">Operación</label><select id="pre-tipo" class="form-select"><option value="DESCARGA">↓ Descarga</option><option value="CARGA">↑ Carga</option></select></div>
-            <div class="form-group"><label class="form-label">Cliente</label><select id="pre-proy" class="form-select selector-proyectos"></select></div>
+            <div class="form-group"><label class="form-label">Cliente</label><select id="pre-proy" class="form-select selector-proyectos"><option value="BITRON">BITRON</option><option value="REBOUND">REBOUND</option><option value="NWT">NWT</option><option value="CBC">CBC</option><option value="SIT&amp;B">SIT&amp;B</option><option value="TOYOTA">TOYOTA</option><option value="VANTAX">VANTAX</option><option value="SHIMA SEIKI">SHIMA SEIKI</option><option value="OTROS">OTROS</option></select></div>
             <div class="form-group"><label class="form-label">Agencia</label><input type="text" id="pre-agencia" class="form-input" list="dl-ag" autocomplete="off" placeholder="DHL…"></div>
             <div class="form-group"><label class="form-label">Matrícula</label><input type="text" id="pre-mat" class="form-input" list="dl-mat" autocomplete="off" placeholder="1234 ABC"></div>
             <div class="form-group"><label class="form-label">Notas / Referencia</label><input type="text" id="pre-obs" class="form-input" placeholder="Pedido, pallets…"></div>
@@ -988,7 +988,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-metricas">
     <div class="modal-box wide" style="height:90vh;display:flex;flex-direction:column;overflow-y:auto;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w"><div class="modal-icon">📊</div><div class="modal-title"><em>Métricas</em> de operación</div></div>
             <button class="btn-close" onclick="closeModal('modal-metricas')">✕</button>
         </div>
@@ -1000,7 +1000,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-editprev" style="z-index:1100;">
     <div class="modal-box" style="max-width:520px;max-height:92dvh;overflow-y:auto;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w"><div class="modal-icon">✎</div><div class="modal-title"><em id="ep-tit">Editar previsión</em></div></div>
             <button class="btn-close" onclick="closeModal('modal-editprev')">✕</button>
         </div>
@@ -1020,7 +1020,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 <div class="modal-overlay" id="modal-reporte">
     <div class="modal-box wide" style="height:90vh;display:flex;flex-direction:column;">
-        <div class="modal-header">
+        <div class="modal-header"><button type="button" class="btn-back">← Volver</button>
             <div class="modal-title-w">
                 <div class="modal-icon">≡</div>
                 <div class="modal-title">Histórico <em>y Reportes</em></div>
@@ -1036,7 +1036,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         </div>
         <div class="stats-row" id="stats-row"></div>
         <div class="filter-panel">
-            <div class="form-group"><label class="form-label">Cliente</label><select id="f-proyecto" class="form-select selector-proyectos" onchange="renderReporte()"><option value="">Todos</option></select></div>
+            <div class="form-group"><label class="form-label">Cliente</label><select id="f-proyecto" class="form-select selector-proyectos" onchange="renderReporte()"><option value="">Todos</option><option value="BITRON">BITRON</option><option value="REBOUND">REBOUND</option><option value="NWT">NWT</option><option value="CBC">CBC</option><option value="SIT&amp;B">SIT&amp;B</option><option value="TOYOTA">TOYOTA</option><option value="VANTAX">VANTAX</option><option value="SHIMA SEIKI">SHIMA SEIKI</option><option value="OTROS">OTROS</option></select></div>
             <div class="form-group"><label class="form-label">Mes</label><input type="month" id="f-mes" class="form-input" onchange="renderReporte()"></div>
             <div class="form-group"><label class="form-label">Día</label><input type="date" id="f-dia" class="form-input" onchange="renderReporte()"></div>
             <div class="form-group"><label class="form-label">Agencia</label><input type="text" id="f-agencia" class="form-input" placeholder="DHL…" oninput="renderReporte()"></div>
@@ -1046,9 +1046,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="table-wrap">
             <table>
                 <thead><tr>
-                    <th>Fecha</th><th>Cliente</th><th>Agencia</th><th>Matrícula</th>
+                    <th>Fecha</th><th>Cliente</th><th>Agencia</th><th>Matrícula</th><th>Referencia</th>
                     <th>Op.</th><th>Bultos/Pallets/Kg</th><th>Muelle</th><th>Llegada</th><th>Inicio</th><th>Fin</th>
-                    <th>Duración</th><th style="width:240px;text-align:left;padding-left:20px;">Incidencias / Notas</th>
+                    <th>Duración</th><th style="width:240px;text-align:left;padding-left:20px;">Incidencias / Notas</th><th></th>
                 </tr></thead>
                 <tbody id="body-logs"></tbody>
             </table>
@@ -1061,7 +1061,7 @@ const MUELLES = [2,3,4,5]; // 5 = Pasillo trasero
 const nomMu = m => m == 5 ? 'Pasillo trasero' : 'Muelle 0' + m;
 const LISTA_PROYECTOS = ["BITRON","REBOUND","NWT","CBC","SIT&B","TOYOTA","VANTAX","SHIMA SEIKI","OTROS"];
 let dbMuelles = { 2:[], 3:[], 4:[], 5:[] };
-let historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
+let feedbacks = [], historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isoLocal = d => { d = new Date(d); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 
@@ -1072,7 +1072,7 @@ const LS_SALA  = 'yusen_sala_v2';
 function saveLocal() {
     try {
         localStorage.setItem(LS_STATE, JSON.stringify({
-            dbMuelles, historico, previsiones, habituales, borrados, rev: localRev, ts: Date.now()
+            dbMuelles, historico, previsiones, habituales, borrados, feedbacks, rev: localRev, ts: Date.now()
         }));
     } catch(e) {}
 }
@@ -1085,7 +1085,7 @@ function loadLocal() {
         if (!d.dbMuelles) return;
         dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; });
         historico   = d.historico || [];
-        previsiones = d.previsiones || []; habituales = d.habituales || []; borrados = d.borrados || []; localRev = d.rev || 0;
+        previsiones = d.previsiones || []; habituales = d.habituales || []; borrados = d.borrados || []; feedbacks = d.feedbacks || []; localRev = d.rev || 0;
         // Restaurar fechas
         const fixDates = arr => arr.forEach(c => {
             ['t_llegada','t_inicio','t_fin'].forEach(k => { if (c[k]) c[k] = new Date(c[k]); });
@@ -1275,7 +1275,7 @@ function _setupConn(c) {
 }
 
 function _snapshot() {
-    return { dbMuelles, previsiones, historico, habituales, borrados, rev: localRev };
+    return { dbMuelles, previsiones, historico, habituales, borrados, feedbacks, rev: localRev };
 }
 
 function _applySnapshot(p) {
@@ -1306,7 +1306,7 @@ function broadcastState() {
 function connectToOperario() { /* legacy — no usado */ }
 function initNetwork() { /* legacy — no usado */ }
 function exportarEstadoCompleto() {
-    const d = {dbMuelles,historico,previsiones,habituales,version:"4.0",fechaExportacion:new Date().toISOString()};
+    const d = {dbMuelles,historico,previsiones,habituales,feedbacks,version:"4.0",fechaExportacion:new Date().toISOString()};
     const a = document.createElement('a');
     a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(d));
     a.download = `Yusen_Muelles_${isoLocal(new Date())}.json`;
@@ -1321,7 +1321,7 @@ function importarEstadoCompleto(input) {
         try {
             const d = JSON.parse(e.target.result);
             if (d.dbMuelles && d.historico && d.previsiones) {
-                dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; }); historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales;
+                dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; }); historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales; if (d.feedbacks) feedbacks = d.feedbacks;
                 renderPizarra(); renderReporte();
                 if (document.getElementById('modal-calendario').classList.contains('open')) renderCalendario();
                 broadcastState(); showToast('Estado restaurado con éxito');
@@ -2014,7 +2014,7 @@ function renderMetricas() {
     const data = historico.filter(h => !per || (h.fecha || '') >= isoLocal(lim));
     const dif = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 60000 : null;
     const fm = v => v == null ? '—' : Math.round(v) + ' min';
-    const avg = a => { a = a.filter(x => x != null && x >= 0); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; };
+    const avg = a => { a = a.filter(x => x != null && x >= 0 && x <= _OK); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; };
     const punt = h => { const p = previsiones.find(x => x.id === h.previsionId); if (!p || !h.t_llegada) return null; const d = dif(new Date(p.fecha + 'T' + p.hora), h.t_llegada); return d == null ? null : d <= 15; };
     const rows = a => ({ n: a.length, esp: avg(a.map(h => dif(h.t_llegada, h.t_inicio))), op: avg(a.map(h => dif(h.t_inicio, h.t_fin))), pt: (() => { const v = a.map(punt).filter(x => x != null); return v.length ? Math.round(100 * v.filter(Boolean).length / v.length) + '%' : '—'; })() });
     const g = rows(data);
@@ -2030,7 +2030,7 @@ function renderMetricas() {
     const mx = Math.max(1, ...hrs);
     document.getElementById('m-body').innerHTML = (data.length ? '' : '<div class="hab-empty">Sin datos en el histórico para este periodo.</div>')
         + `<div class="mt-h">Actividad por hora de inicio</div><div class="mt-bars">${hrs.map((n, i) => `<div class="mt-bar" style="height:${Math.max(2, 100 * n / mx)}%" title="${i}:00 · ${n} camiones"></div>`).join('')}</div><div class="mt-lbl">${hrs.map((_, i) => `<span>${i}</span>`).join('')}</div>`
-        + tabla('Por agencia', 'agencia') + tabla('Por cliente', 'proyecto');
+        + tabla('Por agencia', 'agencia') + tabla('Por cliente', 'proyecto') + _revisar(data.filter(h=>h.t_fin&&h.t_llegada));
 }
 
 // Hora -> minutos (ordena bien aunque venga como "9:30" o vacía)
@@ -2120,7 +2120,7 @@ function renderReporte() {
         (!fAg||h.agencia.includes(fAg))&&(!fMt||h.matricula.includes(fMt))
     );
     const totalMin = data.reduce((s,h)=>s+(h.t_fin&&h.t_inicio?mins(h.t_inicio,h.t_fin):0),0);
-    const avgMin   = data.length ? Math.round(totalMin/data.length) : 0;
+    const _v=data.filter(h=>h.t_fin&&h.t_inicio&&mins(h.t_inicio,h.t_fin)<=_OK), avgMin=_v.length?Math.round(_v.reduce((q,h)=>q+mins(h.t_inicio,h.t_fin),0)/_v.length):0;
     document.getElementById('stats-row').innerHTML = `
         <div class="stat-card orange"><div class="stat-val">${data.length}</div><div class="stat-lbl">Total registros</div></div>
         <div class="stat-card green"><div class="stat-val">${fmtMin(avgMin)}</div><div class="stat-lbl">Duración media</div></div>
@@ -2132,14 +2132,15 @@ function renderReporte() {
             <td><span class="card-tag">${esc(h.proyecto)}</span></td>
             <td style="font-weight:700">${esc(h.agencia)}</td>
             <td class="td-orange">${esc(h.matricula)}</td>
+            <td style="font-size:10.5px;color:var(--text2);">${esc(h.merc||'—')}</td>
             <td>${h.tipo}</td>
             <td style="font-size:10.5px;color:var(--text2);">${h.bultos||0}b · ${h.pallets||0}p · ${h.kg||0}kg</td>
             <td style="font-family:var(--mono);color:var(--text2);">${h.muelle?(h.muelle==5?'PT':'0'+h.muelle):'—'}</td>
             <td>${fmt(h.t_llegada)}</td><td>${fmt(h.t_inicio)}</td><td>${fmt(h.t_fin)}</td>
-            <td class="td-orange">${h.t_fin&&h.t_inicio?fmtMin(mins(h.t_inicio,h.t_fin)):'—'}</td>
+            <td class="td-orange">${h.t_fin&&h.t_inicio?fmtMin(mins(h.t_inicio,h.t_fin))+(mins(h.t_llegada,h.t_fin)>_OK?' ⚠':''):'—'}</td>
             <td style="text-align:left;padding-left:14px;">
                 <input type="text" class="table-comment-input" placeholder="Añadir nota…" value="${esc(h.comentario||'')}" onchange="actualizarComentarioHistorico(${h.id},this.value)">
-            </td>
+            </td><td>${_eb(h)}</td>
         </tr>`).join('');
 }
 
@@ -2156,7 +2157,7 @@ function inicializarSelectsProyectos() {
 
 
 // ═══ v5: edición, deshacer, alertas, CSV ═══
-function esperaMedia(d){ const x=d.filter(h=>h.t_inicio&&h.t_llegada); return x.length?Math.round(x.reduce((s,h)=>s+mins(h.t_llegada,h.t_inicio),0)/x.length):0; }
+function esperaMedia(d){ const x=d.filter(h=>h.t_inicio&&h.t_llegada&&mins(h.t_llegada,h.t_inicio)<=_OK); return x.length?Math.round(x.reduce((s,h)=>s+mins(h.t_llegada,h.t_inicio),0)/x.length):0; }
 function exportarCSV(){
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   const rows=[['Fecha','Cliente','Agencia','Matrícula','Operación','Bultos','Pallets','Kg','Muelle','Llegada','Inicio','Fin','Duración(min)','Espera(min)','Notas']];
@@ -2232,7 +2233,7 @@ function configurarNube(){
   const r=document.getElementById('room-input').value.trim(); if(r) entrarSala();
 }
 function cloudStop(){ if(_es){ _es.close(); _es=null; } if(window.chkStop) chkStop(); }
-const _core=o=>JSON.stringify([o.dbMuelles,o.historico,o.previsiones,o.habituales||[],o.borrados||[]]);
+const _core=o=>JSON.stringify([o.dbMuelles,o.historico,o.previsiones,o.habituales||[],o.borrados||[],o.feedbacks||[]]);
 function cloudStart(sala){
   if(window.chkStart) chkStart(sala);
   uiSala('☁ Conectando…',false);
@@ -2276,6 +2277,7 @@ function mergeRemote(p){
   dbMuelles=dm; historico=[...hist.values()].sort((a,b)=>a.id-b.id); previsiones=[...pv.values()].sort((a,b)=>a.id-b.id);
   const hb=new Map(); [...(lose.habituales||[]),...(win.habituales||[])].forEach(x=>{ if(!B.has(x.id)){ const o=hb.get(x.id); hb.set(x.id,o?{...x,gen:[...new Set([...(o.gen||[]),...(x.gen||[])])]}:x); } }); habituales=[...hb.values()].sort((a,b)=>a.id-b.id);
   borrados=[...B].sort((a,b)=>a-b).slice(-500); localRev=Math.max(localRev,p.rev||0);
+  {const fm=new Map();[...(lose.feedbacks||[]),...(win.feedbacks||[])].forEach(f=>{const k=f.k||f.id,o=fm.get(k);fm.set(k,{...f,del:(f.del||(o&&o.del))?1:0})});feedbacks=[...fm.values()].sort((a,b)=>a.t-b.t)}
 }
 
 inicializarSelectsProyectos();
@@ -2290,7 +2292,22 @@ if (_salaGuardada && !window.__DRV) {
     // Pequeño delay para que el DOM esté listo
     setTimeout(() => entrarSala(), 300);
 }
-</script>
+</script><div class="modal-overlay" id="modal-camion"><div class="modal-box">
+<div class="modal-header"><button type="button" class="btn-back">← Volver</button><div class="modal-title-w"><div class="modal-icon">✎</div><div class="modal-title">Editar <em>camión</em></div></div><button class="btn-close" onclick="closeModal('modal-camion')">✕</button></div>
+<div class="form-grid">
+<div class="form-group"><label class="form-label">Cliente</label><select id="ed-proy" class="form-select selector-proyectos"><option value="BITRON">BITRON</option><option value="REBOUND">REBOUND</option><option value="NWT">NWT</option><option value="CBC">CBC</option><option value="SIT&amp;B">SIT&amp;B</option><option value="TOYOTA">TOYOTA</option><option value="VANTAX">VANTAX</option><option value="SHIMA SEIKI">SHIMA SEIKI</option><option value="OTROS">OTROS</option></select></div>
+<div class="form-group"><label class="form-label">Operación</label><select id="ed-tipo" class="form-select"><option value="DESCARGA">↓ Descarga</option><option value="CARGA">↑ Carga</option></select></div>
+<div class="form-group"><label class="form-label">Agencia</label><input id="ed-ag" class="form-input"></div>
+<div class="form-group"><label class="form-label">Matrícula</label><input id="ed-mat" class="form-input"></div>
+<div class="form-group full"><label class="form-label">Mercancía / referencia</label><input id="ed-merc" class="form-input"></div>
+<div class="form-group"><label class="form-label">Bultos</label><input id="ed-bultos" type="number" min="0" class="form-input"></div>
+<div class="form-group"><label class="form-label">Pallets</label><input id="ed-pallets" type="number" min="0" class="form-input"></div>
+<div class="form-group"><label class="form-label">Peso (Kg)</label><input id="ed-kg" type="number" min="0" step="0.1" class="form-input"></div>
+<div class="form-group"><label class="form-label">Muelle</label><select id="ed-mu" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo trasero</option></select></div>
+</div>
+<button class="btn-submit" onclick="guardarCamion()">Guardar cambios</button>
+<button class="btn-cancel" style="color:var(--red)" onclick="eliminarCamion()">Eliminar camión</button>
+<button class="btn-cancel" onclick="closeModal('modal-camion')">Cancelar</button></div></div>
 <script>
 /* v6 móvil: altura real de la cabecera para dock-header sticky */
 (function(){function f(){var h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hdr-h',h.offsetHeight+'px')}
@@ -2325,7 +2342,7 @@ addEventListener('resize',f);addEventListener('orientationchange',f);addEventLis
     var r=document.getElementById('room-input').value.trim(); if(r) entrarSala();
   };
 })();
-</script>
+</script><div class="modal-overlay" id="modal-nube"><div class="modal-box"><div class="modal-header"><button type="button" class="btn-back" onclick="closeModal('modal-nube')">← Volver</button><div class="modal-title-w"><div class="modal-title">Sincronización <em>en la nube</em></div></div><button class="btn-close" onclick="closeModal('modal-nube')">✕</button></div><div class="form-group"><label class="form-label">URL de Firebase Realtime Database</label><input type="url" id="nube-url" class="form-input" placeholder="https://xxxx-default-rtdb.europe-west1.firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="url"></div><div class="form-group" style="margin-top:12px"><label class="form-label">Código de sala (igual en todos los equipos)</label><input type="text" id="nube-sala" class="form-input" placeholder="BCN01" maxlength="15" autocapitalize="characters" autocorrect="off" style="text-transform:uppercase"></div><div id="nube-msg"></div><button class="btn-submit" id="nube-go" style="margin-top:16px" onclick="guardarNube()">Probar y conectar</button><button class="btn-cancel" onclick="guardarNube(true)">Desactivar nube (solo P2P)</button></div></div>
 <script>
 /* v8 móvil: Nube con prueba de conexión + sala en la misma pantalla + chip de estado */
 (function(){
@@ -2427,7 +2444,8 @@ const _syncFin=()=>{if(window.__DRV||!fbUrl||!salaActiva)return;
   fetch(`${fbUrl}/chk/${encodeURIComponent(salaActiva)}/${h.chkKey}.json`,{method:'PATCH',body:JSON.stringify(d)}).then(r=>{if(!r.ok)delete _cs[k]}).catch(()=>{delete _cs[k]})})};
 window.chkAssign=()=>chkSyncQueue();
 {const _rp=window.renderPizarra;window.renderPizarra=function(){const r=_rp.apply(this,arguments);try{chkSyncQueue();_syncFin()}catch(e){}return r}}
-function chkRender(){if(window.__DRV)return;let t=document.getElementById('chk-tray');
+function chkFb(){let n=0;Object.entries(_chk).forEach(([k,v])=>{if(!v||!v.fb||!v.fb.r||feedbacks.some(f=>f.k===k))return;const w=v.fb,t=+w.t||Date.now();feedbacks.push({id:t,k,t,r:Math.min(5,Math.max(1,+w.r|0)),c:String(w.c||'').slice(0,500),l:w.l||'',proyecto:v.proyecto||'',agencia:v.agencia||'',matricula:v.matricula||'',tipo:v.tipo||'',muelle:v.muelle||0,chofer:v.chofer||'',tel:v.tel||'',leido:0});n++});if(n){broadcastState();if(window.fbBadge)fbBadge();if(window.refrescarVistas)refrescarVistas();showToast('⭐ Nueva valoración de un chófer')}}
+function chkRender(){if(window.__DRV)return;try{chkFb()}catch(e){}let t=document.getElementById('chk-tray');
  if(!t){document.body.insertAdjacentHTML('beforeend','<div id="chk-tray"></div>');t=document.getElementById('chk-tray')}
  const L=Object.entries(_chk).filter(([k,v])=>v&&v.matricula&&!v.muelle&&!v.den).sort((a,b)=>a[1].t-b[1].t),min=t.classList.contains('min');
  t.style.display=L.length?'block':'none';
@@ -2517,16 +2535,22 @@ function dvDock(s){const kk=s.ps=='proc'?(s.tipo=='CARGA'?'sc':'sd'):'pass',pos=
  if(m==5)h+=`<div class="dr"><b>🚪 ${T('how')}</b><p>${T('dir')}</p></div>`;
  return h}
 function dvFin(){const s=S.st||{},k=s.tipo=='CARGA'?'fc':'fd',o=Object.keys(TR).filter(l=>l!=S.lang);
- return `<div class="dc"><div class="pl">${esc(s.matricula||'')}</div><div class="go" style="font-size:24px;line-height:1.4">✅ ${T(k)}</div></div>`}
+ return `<div class="dc"><div class="pl">${esc(s.matricula||'')}</div><div class="go" style="font-size:24px;line-height:1.4">✅ ${T(k)}</div>${dvFb()}</div>`}
 function dvAlert(){const o=Object.keys(TR).filter(l=>l!=S.lang);
  return `<div class="al"><div class="ic">⚠️</div><div class="m">${T('cz')}</div><button onclick="DV.alert=0;dvDraw()">${T('ent')}</button></div>`}
+const FBT={es:['¿Qué tal tu experiencia con la app?','Comentario (opcional)','Enviar','¡Gracias por tu opinión!','Elige una puntuación'],en:['How was your experience with the app?','Comment (optional)','Send','Thank you for your feedback!','Please choose a rating'],pt:['Como foi a sua experiência com a app?','Comentário (opcional)','Enviar','Obrigado pela sua opinião!','Escolha uma classificação'],fr:['Comment était votre expérience avec l’appli ?','Commentaire (facultatif)','Envoyer','Merci pour votre avis !','Choisissez une note'],ca:['Què tal la teva experiència amb l’app?','Comentari (opcional)','Enviar','Gràcies per la teva opinió!','Tria una puntuació']};
+function dvFb(){const t=FBT[S.lang]||FBT.es;if(S.fbSent)return `<div class="fb"><div class="fbt">⭐ ${t[3]}</div></div>`;
+ return `<div class="fb"><div class="fbt">${t[0]}</div><div class="fbs">${[1,2,3,4,5].map(n=>`<button class="${n<=(S.fbr||0)?'on':''}" onclick="DV.fbR(${n})">★</button>`).join('')}</div><textarea rows="3" maxlength="500" placeholder="${t[1]}" oninput="DV.fbc=this.value;DV.fbTouch=1">${esc(S.fbc||'')}</textarea><button class="bt" onclick="DV.fbSend()">${t[2]}</button></div>`}
+S.fbR=n=>{S.fbr=n;S.fbTouch=1;draw()};
+S.fbSend=async()=>{const t=FBT[S.lang]||FBT.es;if(!S.fbr)return alert(t[4]);const o={r:S.fbr,c:(S.fbc||'').trim().slice(0,500),t:Date.now(),l:S.lang};
+ try{const r=await fetch(`${fb}/chk/${encodeURIComponent(sala)}/${S.key}.json`,{method:'PATCH',body:JSON.stringify({fb:o})});if(!r.ok)throw new Error('HTTP '+r.status);S.fbSent=1;draw();setTimeout(dvBye,6000)}catch(e){alert(T('ns')+' ('+(e&&e.message?e.message:e)+')')}};
 function dvThanks(){const o=Object.keys(TR).filter(l=>l!=S.lang);
  return `<div class="dc"><div class="ty">${T('ty')}</div><div class="lgo">Y · Yusen Logistics</div></div>`}
 function dvDeny(){S.denied=1;try{sessionStorage.setItem('yb_den_'+sala,(S.st&&S.st.matricula)||'-');localStorage.removeItem('yb_chk_'+sala)}catch(e){}if(S.es){S.es.close();S.es=null}S.key=null;try{beep();navigator.vibrate&&navigator.vibrate([400,200,400])}catch(e){}vzSay(T('dn'))}
 function dvDenied(){let p=(S.st&&S.st.matricula)||'';if(!p){try{p=sessionStorage.getItem('yb_den_'+sala)||''}catch(e){}if(p=='-')p=''}
  return `<div class="dc"><div class="pl">${esc(p)}</div><div class="st">⛔ ${T('dn')}</div></div>`}
 window.dvBye=()=>{if(S.done)return;S.done=1;try{sessionStorage.setItem('yb_done_'+sala,'1');localStorage.removeItem('yb_chk_'+sala)}catch(e){}if(S.es){S.es.close();S.es=null}S.key=null;S.st=null;draw();setTimeout(()=>{try{window.close()}catch(e){}},4000)};
-function draw(){document.documentElement.lang=S.lang;wl();if(S.st&&S.st.den&&!S.denied)dvDeny();{const pp=S.st&&S.st.ps||'';if(pp!==S._lps){if(S._lps!==undefined&&(pp=='proc'||pp=='fin')){beep();navigator.vibrate&&navigator.vibrate([300,150,300]);const c=S.st.tipo=='CARGA';if(pp=='proc')vzSay(T(c?'sc':'sd'),T('wn'));else vzSay(T(c?'fc':'fd'))}S._lps=pp}if(pp=='fin'&&!S._fin){S._fin=1;setTimeout(dvBye,30000)}}
+function draw(){document.documentElement.lang=S.lang;wl();if(S.st&&S.st.den&&!S.denied)dvDeny();{const pp=S.st&&S.st.ps||'';if(pp!==S._lps){if(S._lps!==undefined&&(pp=='proc'||pp=='fin')){beep();navigator.vibrate&&navigator.vibrate([300,150,300]);const c=S.st.tipo=='CARGA';if(pp=='proc')vzSay(T(c?'sc':'sd'),T('wn'));else vzSay(T(c?'fc':'fd'))}S._lps=pp}if(pp=='fin'&&!S._fin){S._fin=1;setTimeout(function w(){if(S.fbTouch&&!S.fbSent)return setTimeout(w,30000);dvBye()},120000)}}
  {const np=S.st&&S.st.muelle?(+S.st.pos||0):-1;if(np!==S._lp){if(S._lp!==undefined&&np>=0&&(np===0||S._lp<0)){S.alert=1;beep();navigator.vibrate&&navigator.vibrate([300,150,300]);const m=S.st.muelle;if(np===0)vzSay(m==5?T('dir'):T('pass')+' '+m,T('cz'));else vzSay(T('wq'),T('cz'))}S._lp=np}}
  {const m=S.st&&S.st.msg;if(S.key&&m&&m.id&&m.id!=S.msgShown&&String(m.id)!==localStorage.getItem('yb_msg_'+S.key)){S.msgShown=m.id;S.showMsg=m;try{beep();navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(e){}if(m.q)vzSay(dvMsgTxt(m))}}
  if(!S.lo&&!S.key&&!S.denied&&!S.done&&!sessionStorage.getItem('yb_den_'+sala)&&!sessionStorage.getItem('yb_done_'+sala)){root.innerHTML=dvPick();return}
@@ -2556,5 +2580,102 @@ let _d=0;setInterval(()=>{if(dead()&&!_d){_d=1;draw()}},3e3);
 })();
 
 </script>
-</body>
-</html>
+
+
+<div id="chk-tray" style="display: none;"><div class="chk-h" onclick="document.getElementById('chk-tray').classList.toggle('min')">📥 Llegadas sin asignar <b>0</b></div></div><button id="msg-fab" onclick="msgToggle()" style="display: none;">💬 Mensajes</button><div id="msg-panel"><div class="msg-h"><span style="padding:0">💬 Mensaje al conductor</span><span onclick="msgToggle()">✕</span></div><div class="msg-lb">1 · Elige conductor</div><div id="msg-list"></div><div class="msg-lb">2 · Mensaje rápido (se traduce solo al idioma del chófer)</div><div id="msg-qp"><button onclick="msgQ('move')">Mueve el camión, por favor.</button><button onclick="msgQ('office')">Pasa por ventanilla.</button><button onclick="msgQ('wait')">Espera en tu vehículo, enseguida te atendemos.</button><button onclick="msgQ('engine')">Apaga el motor.</button><button onclick="msgQ('chocks')">Coloca los calzos en las ruedas.</button><button onclick="msgQ('docs')">Ten preparada la documentación (CMR / albarán).</button><button onclick="msgQ('ppe')">Es obligatorio usar chaleco y calzado de seguridad.</button><button onclick="msgQ('leave')">Ya puedes salir. Buen viaje.</button></div><div class="msg-lb">…o escribe uno libre (se envía tal cual, sin traducir)</div><textarea id="msg-x" rows="2" maxlength="140"></textarea><button id="msg-go" onclick="msgSend()">Enviar 📤</button></div><script>
+/* v6: edición de histórico, anomalías (>12 h) y pestaña KPI */
+const _OK=720,_f=m=>m==null?'—':fmtMin(Math.round(m)),_dd=(a,b)=>a&&b?(new Date(b)-new Date(a))/6e4:null;
+const _tl=d=>{if(!d)return'';d=new Date(d);return isoLocal(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const _q=(a,p)=>{if(!a.length)return null;a=[...a].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor(p*a.length))]};
+const _av=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const _opts=l=>l.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+const _F=(i,l,t,full)=>`<div class="form-group${full?' full':''}"><label class="form-label">${l}</label><input id="eh-${i}" type="${t||'text'}" class="form-input"></div>`;
+const _hd=(ic,t,c)=>`<div class="modal-header"><button type="button" class="btn-back">← Volver</button><div class="modal-title-w"><div class="modal-icon">${ic}</div><div class="modal-title">${t}</div></div><button class="btn-close" onclick="closeModal('${c}')">✕</button></div>`;
+document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-hist" style="z-index:1100"><div class="modal-box" style="max-width:560px;max-height:92dvh;overflow-y:auto">${_hd('✎','Editar <em>registro</em>','modal-hist')}<div class="form-grid">
+<div class="form-group"><label class="form-label">Cliente</label><select id="eh-proy" class="form-select">${_opts(LISTA_PROYECTOS)}</select></div>
+<div class="form-group"><label class="form-label">Operación</label><select id="eh-tipo" class="form-select"><option value="DESCARGA">↓ Descarga</option><option value="CARGA">↑ Carga</option></select></div>
+${_F('ag','Agencia')}${_F('mat','Matrícula')}${_F('merc','Referencia / mercancía','text',1)}${_F('bultos','Bultos','number')}${_F('pallets','Pallets','number')}${_F('kg','Peso (Kg)','number')}
+<div class="form-group"><label class="form-label">Muelle</label><select id="eh-mu" class="form-select"><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo trasero</option></select></div>
+${_F('lle','Llegada','datetime-local')}${_F('ini','Inicio','datetime-local')}${_F('fin','Fin','datetime-local')}${_F('com','Notas','text',1)}</div>
+<button class="btn-submit" onclick="guardarHist()">Guardar cambios</button><button class="btn-cancel" style="color:var(--red)" onclick="eliminarHist()">Eliminar registro</button><button class="btn-cancel" onclick="closeModal('modal-hist')">Cancelar</button></div></div>
+<div class="modal-overlay" id="modal-kpi"><div class="modal-box wide" style="height:92vh;display:flex;flex-direction:column;overflow-y:auto">${_hd('📈','<em>KPI</em> y análisis','modal-kpi')}
+<div class="filter-panel">
+<div class="form-group"><label class="form-label">Periodo</label><select id="k-per" class="form-select" onchange="renderKPI()"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option><option value="365">1 año</option><option value="0">Todo</option></select></div>
+<div class="form-group"><label class="form-label">Desde</label><input type="date" id="k-d1" class="form-input" onchange="renderKPI()"></div>
+<div class="form-group"><label class="form-label">Hasta</label><input type="date" id="k-d2" class="form-input" onchange="renderKPI()"></div>
+<div class="form-group"><label class="form-label">Cliente</label><select id="k-cli" class="form-select" onchange="renderKPI()"></select></div>
+<div class="form-group"><label class="form-label">Agencia</label><select id="k-ag" class="form-select" onchange="renderKPI()"></select></div>
+<div class="form-group"><label class="form-label">Operación</label><select id="k-tipo" class="form-select" onchange="renderKPI()"><option value="">Todas</option><option value="DESCARGA">Descarga</option><option value="CARGA">Carga</option></select></div>
+<div class="form-group"><label class="form-label">Muelle</label><select id="k-mu" class="form-select" onchange="renderKPI()"><option value="">Todos</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">PT</option></select></div>
+<div class="form-group"><label class="form-label">Turno (llegada)</label><select id="k-tur" class="form-select" onchange="renderKPI()"><option value="">Todos</option><option value="M">Mañana 6–14</option><option value="T">Tarde 14–22</option><option value="N">Noche 22–6</option></select></div>
+<div class="form-group"><label class="form-label">Registros &gt;12 h</label><select id="k-an" class="form-select" onchange="renderKPI()"><option value="1">Excluir de medias</option><option value="0">Incluir</option></select></div>
+<div class="form-group"><label class="form-label">Objetivo espera (min)</label><input type="number" id="k-sla" class="form-input" value="30" min="1" onchange="renderKPI()"></div>
+<div class="form-group" style="justify-content:flex-end"><button class="nav-btn" style="height:42px" onclick="resetKPI()">✕ Limpiar</button></div></div>
+<div id="k-body"></div></div></div>`);
+let _eh=null;
+function editarHist(id){const h=historico.find(x=>x.id===id);if(!h)return;_eh=id;const v=(k,x)=>document.getElementById('eh-'+k).value=x??'';
+ v('proy',h.proyecto);v('tipo',h.tipo);v('ag',h.agencia);v('mat',h.matricula);v('merc',h.merc||'');v('bultos',h.bultos||0);v('pallets',h.pallets||0);v('kg',h.kg||0);v('mu',h.muelle||2);v('lle',_tl(h.t_llegada));v('ini',_tl(h.t_inicio));v('fin',_tl(h.t_fin));v('com',h.comentario||'');openModal('modal-hist')}
+function guardarHist(){const h=historico.find(x=>x.id===_eh);if(!h)return closeModal('modal-hist');const g=k=>document.getElementById('eh-'+k).value,D=k=>g(k)?new Date(g(k)):null,l=D('lle'),i=D('ini'),f=D('fin');
+ if(!g('ag').trim()||!l||!f)return showToast('⚠ Agencia, llegada y fin son obligatorios');
+ if((i&&i<l)||f<(i||l))return showToast('⚠ Horas incoherentes: llegada ≤ inicio ≤ fin');
+ Object.assign(h,{proyecto:g('proy'),tipo:g('tipo'),agencia:g('ag').trim().toUpperCase(),matricula:g('mat').toUpperCase()||'S/M',merc:g('merc').toUpperCase(),bultos:parseInt(g('bultos'))||0,pallets:parseInt(g('pallets'))||0,kg:parseFloat(g('kg'))||0,muelle:parseInt(g('mu')),t_llegada:l,t_inicio:i,t_fin:f,fecha:isoLocal(l),mes:isoLocal(l).slice(0,7),comentario:g('com').toUpperCase()});
+ closeModal('modal-hist');refrescarVistas();broadcastState();showToast('✓ Registro actualizado')}
+function eliminarHist(){const h=historico.find(x=>x.id===_eh);if(!h||!confirm('¿Eliminar este registro del histórico?'))return;historico=historico.filter(x=>x.id!==_eh);borrados.push(h.id);closeModal('modal-hist');refrescarVistas();broadcastState();showToast('Registro eliminado')}
+function refrescarVistas(){const o=n=>document.getElementById(n).classList.contains('open');if(o('modal-reporte'))renderReporte();if(o('modal-metricas'))renderMetricas();if(o('modal-kpi'))renderKPI();if(o('modal-fb'))renderFb();fbBadge();renderPizarra()}
+const _as=_applySnapshot;_applySnapshot=function(p){_as(p);refrescarVistas()};
+const _eb=h=>`<button class="btn-card-action edit" style="width:26px;height:26px" onclick="editarHist(${h.id})">✎</button>`;
+function _detalle(arr,n){return`<div class="table-wrap" style="flex:none"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Agencia</th><th>Referencia</th><th>Espera</th><th>Operación</th><th>Total planta</th><th></th></tr></thead><tbody>`+[...arr].sort((a,b)=>_dd(b.t_llegada,b.t_fin)-_dd(a.t_llegada,a.t_fin)).slice(0,n).map(h=>{const t=_dd(h.t_llegada,h.t_fin);return`<tr><td>${h.fecha||''}</td><td>${esc(h.proyecto)}</td><td style="font-weight:700">${esc(h.agencia)}</td><td style="color:var(--text2)">${esc(h.merc||'—')}</td><td>${_f(_dd(h.t_llegada,h.t_inicio))}</td><td>${_f(_dd(h.t_inicio,h.t_fin))}</td><td class="td-orange">${_f(t)}${t>_OK?' ⚠':''}</td><td>${_eb(h)}</td></tr>`}).join('')+'</tbody></table></div>'}
+function resetKPI(){['k-d1','k-d2','k-cli','k-ag','k-tipo','k-mu','k-tur'].forEach(i=>document.getElementById(i).value='');document.getElementById('k-per').value='30';document.getElementById('k-an').value='1';renderKPI()}
+function abrirKPI(){openModal('modal-kpi');renderKPI()}
+function renderKPI(){
+ const $=i=>document.getElementById(i),v=i=>$(i).value,base=historico.filter(h=>h.t_fin&&h.t_llegada);
+ const fill=(id,l,t)=>{const s=$(id),c=s.value;s.innerHTML=`<option value="">${t}</option>`+_opts(l);s.value=c};
+ fill('k-cli',[...new Set(base.map(h=>h.proyecto).filter(Boolean))].sort(),'Todos');fill('k-ag',[...new Set(base.map(h=>h.agencia).filter(Boolean))].sort(),'Todas');
+ const per=+v('k-per'),lim=new Date();lim.setDate(lim.getDate()-per);const d1=v('k-d1')||(per?isoLocal(lim):''),d2=v('k-d2');
+ let a=base.filter(h=>{const f=h.fecha||isoLocal(h.t_llegada),hr=new Date(h.t_llegada).getHours(),t=v('k-tur');return(!d1||f>=d1)&&(!d2||f<=d2)&&(!v('k-cli')||h.proyecto===v('k-cli'))&&(!v('k-ag')||h.agencia===v('k-ag'))&&(!v('k-tipo')||h.tipo===v('k-tipo'))&&(!v('k-mu')||h.muelle==v('k-mu'))&&(!t||(t=='M'?hr>=6&&hr<14:t=='T'?hr>=14&&hr<22:(hr<6||hr>=22)))});
+ const tot=h=>_dd(h.t_llegada,h.t_fin),E=h=>_dd(h.t_llegada,h.t_inicio),O=h=>_dd(h.t_inicio,h.t_fin),bad=a.filter(h=>tot(h)>_OK);
+ const all=a;if(v('k-an')=='1')a=a.filter(h=>tot(h)<=_OK);
+ const col=(r,fn)=>r.map(fn).filter(x=>x!=null&&x>=0),sla=+v('k-sla')||30,esp=col(a,E),op=col(a,O),tt=col(a,tot);
+ const hOp=op.reduce((s,x)=>s+x,0)/60,pal=a.reduce((s,h)=>s+(h.pallets||0),0),kg=a.reduce((s,h)=>s+(h.kg||0),0);
+ const K=(c,x,l)=>`<div class="stat-card ${c}" style="min-width:150px"><div class="stat-val">${x}</div><div class="stat-lbl">${l}</div></div>`;
+ const cards=`<div class="stats-row" style="flex-wrap:wrap">${K('orange',a.length,'Camiones')}${K('blue',_f(_q(esp,.5)),'Espera mediana · P90 '+_f(_q(esp,.9)))}${K('green',_f(_q(op,.5)),'Operación mediana · P90 '+_f(_q(op,.9)))}${K('orange',_f(_q(tt,.5)),'Total en planta (mediana)')}${K('blue',esp.length?Math.round(100*esp.filter(x=>x<=sla).length/esp.length)+'%':'—','Espera ≤ '+sla+' min')}${K('green',pal,'Pallets · '+Math.round(kg).toLocaleString('es-ES')+' kg')}${K('orange',hOp?(pal/hOp).toFixed(1):'—','Pallets / hora operada')}</div>`;
+ const bars=(vals,labs,t,c)=>{const mx=Math.max(1,...vals);return`<div class="mt-h">${t}</div><div class="mt-bars">${vals.map((n,i)=>`<div class="mt-bar" style="height:${Math.max(2,100*n/mx)}%;${c?'background:'+c:''}" title="${labs[i]} · ${Math.round(n*10)/10}"></div>`).join('')}</div><div class="mt-lbl">${labs.map((l,i)=>`<span>${labs.length>31&&i%5?'':l}</span>`).join('')}</div>`};
+ const dm={};a.forEach(h=>{const f=h.fecha||isoLocal(h.t_llegada);dm[f]=(dm[f]||0)+1});const dk=Object.keys(dm).sort().slice(-62);
+ const hc=Array(24).fill(0),he=Array.from({length:24},()=>[]);a.forEach(h=>{const x=new Date(h.t_llegada).getHours();hc[x]++;const e=E(h);if(e!=null&&e>=0)he[x].push(e)});
+ const hl=[...Array(24).keys()].map(String),bk=[[0,15,'<15'],[15,30,'15-30'],[30,60,'30-60'],[60,90,'60-90'],[90,120,'90-120'],[120,240,'2-4 h'],[240,1e9,'>4 h']];
+ const grp=(t,fn)=>{const m={};a.forEach(h=>{(m[fn(h)||'—']=m[fn(h)||'—']||[]).push(h)});return`<div class="mt-h">${t}</div><div class="table-wrap" style="flex:none"><table><thead><tr><th>${t.replace('Por ','')}</th><th>Camiones</th><th>Espera med.</th><th>Espera P90</th><th>Op. med.</th><th>Op. P90</th><th>Total med.</th><th>Pallets</th><th>Espera ≤${sla}'</th></tr></thead><tbody>`+Object.entries(m).sort((x,y)=>y[1].length-x[1].length).slice(0,15).map(([k,r])=>{const e=col(r,E),o=col(r,O);return`<tr><td class="td-orange">${esc(k)}</td><td>${r.length}</td><td>${_f(_q(e,.5))}</td><td>${_f(_q(e,.9))}</td><td>${_f(_q(o,.5))}</td><td>${_f(_q(o,.9))}</td><td>${_f(_q(col(r,tot),.5))}</td><td>${r.reduce((s,h)=>s+(h.pallets||0),0)}</td><td>${e.length?Math.round(100*e.filter(x=>x<=sla).length/e.length)+'%':'—'}</td></tr>`}).join('')+'</tbody></table></div>'};
+ $('k-body').innerHTML=(bad.length?`<div class="hab-empty" style="color:var(--yellow)">⚠ ${bad.length} registro(s) con más de 12 h en planta ${v('k-an')=='1'?'excluidos de las medias':'incluidos en las medias'}. Corrígelos con ✎ en el detalle de abajo.</div>`:'')+(a.length?'':'<div class="hab-empty">Sin datos con estos filtros.</div>')+cards
+ +bars(dk.map(k=>dm[k]),dk.map(k=>k.slice(5)),'Camiones por día')
+ +bars(hc,hl,'Camiones por hora de llegada')
+ +bars(he.map(x=>_q(x,.5)||0),hl,'Espera mediana (min) por hora de llegada','linear-gradient(180deg,var(--blue),#1d4ed8)')
+ +bars(bk.map(b=>op.filter(x=>x>=b[0]&&x<b[1]).length),bk.map(b=>b[2]),'Distribución del tiempo de operación (min)','linear-gradient(180deg,var(--green),#15803d)')
+ +grp('Por cliente',h=>h.proyecto)+grp('Por agencia',h=>h.agencia)+grp('Por muelle',h=>h.muelle?nomMu(h.muelle):'—')+grp('Por operación',h=>h.tipo)
+ +`<div class="mt-h">Detalle · los 30 más largos (✎ para corregir)</div>`+_detalle(all,30)}
+function _revisar(d){return`<div class="mt-h">Registros a revisar · los más largos (⚠ = más de 12 h, posible descarga sin cerrar)</div>`+_detalle(d,8)}
+</script>
+<script>
+/* v7: feedback de chóferes (estrellas + comentario) → pestaña ⭐ Feedback */
+document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-fb"><div class="modal-box wide" style="height:92vh;display:flex;flex-direction:column;overflow-y:auto">${_hd('⭐','<em>Feedback</em> de chóferes','modal-fb')}
+<div class="filter-panel">
+<div class="form-group"><label class="form-label">Periodo</label><select id="fb-per" class="form-select" onchange="renderFb()"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option><option value="0">Todo</option></select></div>
+<div class="form-group"><label class="form-label">Puntuación</label><select id="fb-s" class="form-select" onchange="renderFb()"><option value="">Todas</option><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option><option value="c">Sólo con comentario</option></select></div>
+<div class="form-group"><label class="form-label">Buscar</label><input id="fb-q" class="form-input" placeholder="Texto, matrícula, agencia…" oninput="renderFb()"></div>
+<div class="form-group" style="justify-content:flex-end;flex-direction:row;gap:6px;align-items:flex-end"><button class="nav-btn" style="height:42px" onclick="fbLeidas()">✓ Marcar leídas</button><button class="nav-btn" style="height:42px" onclick="fbCSV()">↓ CSV</button></div></div>
+<div id="fb-body"></div></div></div>`);
+const _st=r=>'<span style="color:var(--yellow);letter-spacing:2px">'+'★'.repeat(r)+'<span style="opacity:.3">'+'★'.repeat(5-r)+'</span></span>';
+function fbBadge(){const n=feedbacks.filter(f=>!f.del&&!f.leido).length,b=document.getElementById('btn-fb');if(b)b.innerHTML='⭐ Feedback'+(n?` <b style="background:var(--orange);color:#fff;border-radius:9px;padding:1px 6px;margin-left:4px">${n}</b>`:'')}
+function abrirFb(){openModal('modal-fb');renderFb()}
+function _fbList(){const g=i=>document.getElementById(i).value,per=+g('fb-per'),q=g('fb-q').toUpperCase(),s=g('fb-s'),lim=Date.now()-per*864e5;return feedbacks.filter(f=>!f.del&&(!per||f.t>=lim)&&(!s||(s=='c'?f.c:f.r==+s))&&(!q||(f.c+' '+f.matricula+' '+f.agencia+' '+f.proyecto).toUpperCase().includes(q))).sort((x,y)=>y.t-x.t)}
+function renderFb(){const a=_fbList(),n=a.length,avg=n?a.reduce((s,f)=>s+f.r,0)/n:0,K=(c,x,l)=>`<div class="stat-card ${c}" style="min-width:150px"><div class="stat-val">${x}</div><div class="stat-lbl">${l}</div></div>`;
+ const dist=[5,4,3,2,1].map(r=>{const c=a.filter(f=>f.r==r).length;return`<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11px"><span style="width:70px">${_st(r)}</span><div style="flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:12px"><div style="width:${n?100*c/n:0}%;height:100%;background:var(--orange);border-radius:4px"></div></div><b style="width:28px;text-align:right">${c}</b></div>`}).join('');
+ document.getElementById('fb-body').innerHTML=`<div class="stats-row" style="flex-wrap:wrap">${K('orange',n,'Valoraciones')}${K('green',n?avg.toFixed(2)+' ★':'—','Puntuación media')}${K('blue',n?Math.round(100*a.filter(f=>f.r>=4).length/n)+'%':'—','Satisfechos (4–5 ★)')}${K('orange',a.filter(f=>f.c).length,'Con comentario')}</div><div style="max-width:420px;margin-bottom:10px">${dist}</div>`
+ +(n?'':'<div class="hab-empty">Aún no hay valoraciones con estos filtros.</div>')
+ +`<div class="table-wrap" style="flex:none"><table><thead><tr><th>Fecha</th><th>★</th><th style="text-align:left">Comentario</th><th>Matrícula</th><th>Agencia</th><th>Cliente</th><th>Op.</th><th>Idioma</th><th></th></tr></thead><tbody>`
+ +a.map(f=>`<tr style="${f.leido?'':'box-shadow:inset 3px 0 var(--orange)'}"><td>${new Date(f.t).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})}</td><td>${_st(f.r)}</td><td style="text-align:left;white-space:normal;min-width:240px">${esc(f.c)||'<span style="opacity:.4">—</span>'}</td><td class="td-orange">${esc(f.matricula)}</td><td style="font-weight:700">${esc(f.agencia)}</td><td>${esc(f.proyecto)}</td><td>${f.tipo=='CARGA'?'↑':'↓'}</td><td>${esc((f.l||'').toUpperCase())}</td><td><button class="btn-card-action del" style="width:26px;height:26px" onclick="fbDel(${f.id})">✕</button></td></tr>`).join('')+'</tbody></table></div>'}
+function fbLeidas(){let c=0;feedbacks.forEach(f=>{if(!f.leido){f.leido=1;c++}});if(c)broadcastState();fbBadge();renderFb()}
+function fbDel(id){if(!confirm('¿Eliminar esta valoración?'))return;const f=feedbacks.find(x=>x.id===id);if(f){f.del=1;broadcastState()}fbBadge();renderFb()}
+function fbCSV(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',r=[['Fecha','Puntuación','Comentario','Matrícula','Agencia','Cliente','Operación','Muelle','Chófer','Idioma']];_fbList().forEach(f=>r.push([new Date(f.t).toLocaleString('es-ES'),f.r,f.c,f.matricula,f.agencia,f.proyecto,f.tipo,f.muelle,f.chofer,f.l]));
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.map(q).join(';')).join('\n')],{type:'text/csv'}));a.download='Yusen_Feedback_'+isoLocal(new Date())+'.csv';a.click()}
+fbBadge();
+</script>
+</body></html>

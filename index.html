@@ -2678,4 +2678,168 @@ function fbCSV(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',r=[['Fecha'
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.map(q).join(';')).join('\n')],{type:'text/csv'}));a.download='Yusen_Feedback_'+isoLocal(new Date())+'.csv';a.click()}
 fbBadge();
 </script>
-</body></html>
+<!-- ═══ v6: CARGA BITRON + CARTA DE PORTE ═══ -->
+<style>
+#cg-bar{position:fixed;left:12px;bottom:64px;z-index:950;display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100vw - 24px))}
+.cg-it{background:linear-gradient(135deg,#ff6600,#cc4400);color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:cgp 1.6s infinite}
+@keyframes cgp{0%,100%{box-shadow:0 0 0 0 rgba(255,102,0,.65),0 10px 30px #000a}50%{box-shadow:0 0 0 12px rgba(255,102,0,0),0 10px 30px #000a}}
+.cg-it .ic{font-size:26px}.cg-it b{display:block;font-size:14px;line-height:1.25}.cg-it small{opacity:.92;font-size:11px}
+.cg-it button{margin-left:auto;background:#fff;color:#cc4400;border:0;border-radius:10px;padding:11px 13px;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap}
+.cg-btn{background:rgba(255,102,0,.15)!important;color:#ff8533!important;border:1px solid rgba(255,102,0,.45)!important;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
+#cg-rows .cg-row{display:grid;grid-template-columns:minmax(120px,1.6fr) auto 92px 86px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.cg-n{font-weight:800;font-size:14px;letter-spacing:.3px}
+.cg-q{display:flex;align-items:center;gap:6px}
+.cg-q button{width:46px;height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:24px;font-weight:700;cursor:pointer}
+.cg-q button:active{background:rgba(255,102,0,.4)}
+.cg-q input{width:58px;height:46px;text-align:center;font-size:20px;font-weight:800;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:#fff;font-family:var(--mono,monospace)}
+.cg-k{font-size:11px;color:var(--text2,#9ab);display:flex;align-items:center;gap:4px}
+.cg-k input{width:58px;padding:5px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:#fff;text-align:right}
+.cg-k input:disabled{border-color:transparent;background:transparent;color:var(--text2,#9ab)}
+.cg-w{text-align:right;font-family:var(--mono,monospace);font-weight:700;font-size:15px}
+.cg-row.on .cg-w{color:#ff8533}
+.cg-tot{display:flex;justify-content:space-between;align-items:center;margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:rgba(255,102,0,.12);border:1px solid rgba(255,102,0,.4)}
+.cg-tot b{font-size:26px;color:#ff8533;font-family:var(--mono,monospace)}
+.cg-lnk{background:none;border:0;color:var(--text2,#9ab);text-decoration:underline;cursor:pointer;font-size:12px;margin-top:8px}
+.cg-lst{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.cg-lst button{margin-left:auto}
+@media(max-width:560px){#cg-rows .cg-row{grid-template-columns:1fr auto;}.cg-k,.cg-w{text-align:left}}
+</style>
+<script>
+(function(){
+const CONC=[['BARRAS AL',500,1],['BARRAS LATON',1000,1],['HILO',250,1],['PCB',100,1],['CAJAS',100,1],['CHATARRA',100,1],['MATERIAL BITRON',100,1],['PALLETS',100,0],['TAPAS',100,0]];
+const LSK='yusen_bitron_kg';
+const kgGuard=()=>{try{return JSON.parse(localStorage.getItem(LSK)||'{}')}catch(_){return {}}};
+const nf=n=>Number(n||0).toLocaleString('es-ES',{maximumFractionDigits:1});
+let _cg=null, _unlock=false;
+
+document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-carga"><div class="modal-box">
+<div class="modal-header"><div class="modal-title-w"><div class="modal-icon">⚖</div><div class="modal-title">Carga <em>BITRON</em> · <span id="cg-mat"></span></div></div><button class="btn-close" onclick="closeModal('modal-carga')">✕</button></div>
+<div id="cg-rows"></div>
+<div class="cg-tot"><div><div style="font-size:11px;color:var(--text2)">TOTAL CARGADO</div><div id="cg-units" style="font-size:13px;margin-top:2px">0 uds</div></div><b id="cg-kg">0 kg</b></div>
+<div class="form-grid" style="margin-top:10px">
+<div class="form-group"><label class="form-label">Conductor</label><input id="cg-cond" class="form-input"></div>
+<div class="form-group"><label class="form-label">N° SR</label><input id="cg-sr" class="form-input"></div></div>
+<button class="btn-submit" id="cg-ok" onclick="cgConfirm()">✓ Finalizar y generar carta de porte</button>
+<div style="display:flex;justify-content:space-between;flex-wrap:wrap"><button class="cg-lnk" onclick="cgUnlock()">⚙ Editar kg por unidad</button><button class="cg-lnk" onclick="cgSkip()">Finalizar sin carta de porte</button></div>
+<button class="btn-cancel" onclick="closeModal('modal-carga')">Cancelar</button></div></div>
+<div class="modal-overlay" id="modal-cartas"><div class="modal-box">
+<div class="modal-header"><div class="modal-title-w"><div class="modal-icon">🖨</div><div class="modal-title">Cartas de <em>porte</em></div></div><button class="btn-close" onclick="closeModal('modal-cartas')">✕</button></div>
+<div id="cg-list"></div></div></div><div id="cg-bar"></div>`);
+
+const _fin2=finalizar;
+const truck=()=>{ if(!_cg) return null; const c=dbMuelles[_cg.m][0]; return c&&c.id===_cg.id?c:null; };
+
+window.abrirCarga=function(m){
+  const c=dbMuelles[m][0]; if(!c) return;
+  _cg={m,id:c.id}; _unlock=false;
+  const ku=kgGuard(), prev={}; ((c.carga&&c.carga.items)||[]).forEach(i=>prev[i.k]=i);
+  document.getElementById('cg-mat').textContent=c.matricula||'';
+  document.getElementById('cg-cond').value=(c.carga&&c.carga.conductor)||c.chofer||'';
+  document.getElementById('cg-sr').value=(c.carga&&c.carga.sr)||'';
+  document.getElementById('cg-ok').textContent=c.estado==='proceso'?'✓ Finalizar y generar carta de porte':'💾 Guardar carga';
+  document.getElementById('cg-rows').innerHTML=CONC.map(([k,u],i)=>`<div class="cg-row" data-i="${i}"><div class="cg-n">${k}</div>
+  <div class="cg-q"><button type="button" data-d="-1">−</button><input type="number" min="0" inputmode="numeric" value="${prev[k]?prev[k].q:0}"><button type="button" data-d="1">+</button></div>
+  <div class="cg-k">×<input type="number" min="0" step="any" class="cgk" disabled value="${ku[k]||u}">kg</div><div class="cg-w">0 kg</div></div>`).join('');
+  cgCalc(); openModal('modal-carga');
+};
+function rowsData(){
+  return [...document.querySelectorAll('#cg-rows .cg-row')].map(r=>{const i=+r.dataset.i,q=Math.max(0,parseInt(r.querySelector('.cg-q input').value)||0),u=Math.max(0,parseFloat(r.querySelector('.cgk').value)||0);return{k:CONC[i][0],ap:CONC[i][2],q,u,w:q*u,r};});
+}
+function cgCalc(){
+  let kg=0,un=0; rowsData().forEach(x=>{kg+=x.w;un+=x.q;x.r.classList.toggle('on',x.q>0);x.r.querySelector('.cg-w').textContent=nf(x.w)+' kg';});
+  document.getElementById('cg-kg').textContent=nf(kg)+' kg'; document.getElementById('cg-units').textContent=un+' uds';
+}
+document.getElementById('cg-rows').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;const inp=b.parentNode.querySelector('input');inp.value=Math.max(0,(parseInt(inp.value)||0)+(+b.dataset.d));cgCalc();});
+document.getElementById('cg-rows').addEventListener('input',cgCalc);
+window.cgUnlock=function(){_unlock=!_unlock;document.querySelectorAll('.cgk').forEach(i=>i.disabled=!_unlock);showToast(_unlock?'kg por unidad editables':'kg por unidad bloqueados');};
+window.cgConfirm=function(){
+  const c=truck(); if(!c){closeModal('modal-carga');return showToast('El camión ya ha cambiado; vuelve a abrirlo');}
+  const d=rowsData(), items=d.filter(x=>x.q>0).map(x=>({k:x.k,q:x.q,u:x.u,w:x.w,ap:x.ap}));
+  if(!items.length) return showToast('⚠ Indica al menos un concepto cargado');
+  const kg=items.reduce((s,x)=>s+x.w,0), un=items.reduce((s,x)=>s+x.q,0), pal=(items.find(x=>x.k==='PALLETS')||{q:0}).q;
+  c.carga={items,kg,units:un,sr:document.getElementById('cg-sr').value.trim(),conductor:document.getElementById('cg-cond').value.trim().toUpperCase(),t:Date.now()};
+  c.cartaPend=true; delete c.cartaImp; delete c.sinCarta;
+  c.kg=kg; c.pallets=pal; c.bultos=un-pal;
+  const ku=kgGuard(); d.forEach(x=>ku[x.k]=x.u); try{localStorage.setItem(LSK,JSON.stringify(ku));}catch(_){}
+  closeModal('modal-carga'); const m=_cg.m;
+  if(c.estado==='proceso') _fin2(m); else {renderPizarra(); broadcastState(); showToast('Carga guardada: '+nf(kg)+' kg');}
+};
+window.cgSkip=function(){const c=truck(); if(!c) return; c.sinCarta=true; closeModal('modal-carga'); _fin2(_cg.m);};
+
+finalizar=function(m){
+  const c=dbMuelles[m][0];
+  if(c&&c.proyecto==='BITRON'&&c.tipo==='CARGA'&&!c.carga&&!c.sinCarta){abrirCarga(m);return;}
+  _fin2(m);
+};
+
+/* ── Aviso en el Control Tower ── */
+let _sig='', _seen=null;
+function pendientes(){return historico.filter(h=>h.carga&&h.cartaPend);}
+function cgBar(){
+  const P=pendientes(), sig=P.map(h=>h.id).join(',');
+  if(sig===_sig) return; _sig=sig;
+  const bar=document.getElementById('cg-bar');
+  bar.innerHTML=P.map(h=>`<div class="cg-it"><span class="ic">🖨</span><div><b>Imprimir albarán de carta de porte</b><small>BITRON · ${esc(h.matricula)} · ${nf(h.carga.kg)} kg · 3 copias</small></div><button onclick="cgPrint(${h.id})">Imprimir</button></div>`).join('');
+  if(_seen!==null&&P.some(h=>!_seen.has(h.id))&&typeof beep==='function'){try{beep(2)}catch(_){}}
+  _seen=new Set(P.map(h=>h.id));
+}
+const _rp=renderPizarra;
+renderPizarra=function(){
+  _rp.apply(this,arguments);
+  MUELLES.forEach(m=>{const c=dbMuelles[m][0],t=document.querySelector('#active-'+m+' .ctools');
+    if(c&&c.proyecto==='BITRON'&&t&&!t.querySelector('.cg-btn')) t.insertAdjacentHTML('beforeend','<button class="cg-btn" onclick="abrirCarga('+m+')">⚖ Carga Bitron'+(c.carga?' ✓ '+nf(c.carga.kg)+' kg':'')+'</button>');});
+  cgBar();
+};
+
+/* ── Lista / reimpresión ── */
+window.cgList=function(){
+  const L=historico.filter(h=>h.carga).sort((a,b)=>new Date(b.t_fin)-new Date(a.t_fin)).slice(0,20);
+  document.getElementById('cg-list').innerHTML=L.length?L.map(h=>`<div class="cg-lst"><div><b>${new Date(h.t_fin).toLocaleDateString('es-ES')} ${fmt(h.t_fin)}</b> · ${esc(h.matricula)}<br><small style="color:var(--text2)">${nf(h.carga.kg)} kg · ${h.carga.units} uds ${h.cartaPend?'· <span style="color:#ff8533">pendiente de imprimir</span>':'· impresa'}</small></div><button class="btn-submit" style="width:auto;padding:8px 14px" onclick="cgPrint(${h.id})">🖨 Imprimir</button></div>`).join(''):'<p style="color:var(--text2)">Todavía no hay cartas de porte.</p>';
+  openModal('modal-cartas');
+};
+document.querySelector('.hd-actions').insertAdjacentHTML('beforeend','<button class="nav-btn blue" onclick="cgList()">🖨 Cartas de porte</button>');
+
+/* ── Documento: carta de porte (3 copias A4 apaisado) ── */
+window.cgPrint=function(id){
+  const h=historico.find(x=>x.id===id); if(!h||!h.carga) return showToast('No encuentro esa carga');
+  const w=window.open('','_blank'); if(!w) return showToast('⚠ El navegador bloqueó la ventana de impresión');
+  w.document.write(cartaHTML(h)); w.document.close();
+  if(h.cartaPend){h.cartaPend=false;h.cartaImp=Date.now();broadcastState();_sig='';cgBar();}
+  setTimeout(()=>{try{w.focus();w.print();}catch(_){}},500);
+};
+function cartaHTML(h){
+  const C=h.carga, by={}; C.items.forEach(i=>by[i.k]=i);
+  const f=new Date(h.t_fin||Date.now()), fecha=f.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const hm=d=>d?new Date(d).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'';
+  const rows=CONC.map(([k])=>{const i=by[k];return `<tr><td>${i?'BITRON':''}</td><td class="c">${k}</td><td class="c">${i?i.q:''}</td><td class="c">${i?nf(i.w):''}</td><td class="c">${i?i.ap:''}</td></tr>`;}).join('');
+  const COP=['EXPEDIDOR (YUSEN)','TRANSPORTISTA','DESTINATARIO (BITRON)'];
+  const pg=n=>`<section><div class="cp">COPIA ${n+1}/3 · ${COP[n]}</div>
+<table class="top"><tr>
+<td style="width:17%"><div class="lb">FECHA DE ENVIO</div><div class="big">${fecha}</div></td>
+<td style="width:21%"><div class="lb">HORARIOS DE RECOGIDA</div><table class="in"><tr><td>Llegada</td><td>${hm(h.t_llegada)}</td></tr><tr><td>Salida</td><td>${hm(h.t_fin)}</td></tr></table><div class="sm">Fecha aviso:</div></td>
+<td style="width:30%" class="c"><b style="font-size:13px">BITRON ESPAÑA</b><br><b style="font-size:13px">Calle Ifni 24-30</b><br><b style="font-size:13px">08930 Sant Adria de Besos</b></td>
+<td class="c g"><b>YUSEN LOGISTICS</b><br><b>Calle Cal Oi de L´Olla, nº 37-39</b><br>08880 El Prat de Llobregat - Barcelona.<br><span class="sm" style="color:#000">Horarios de abertura: <b>9H A 18H</b></span></td></tr></table>
+<div class="ttl">ALBARAN TRANSPORTE</div>
+<table class="sg"><tr><th>Nombre responsable expedición</th><th>Contacto expeditor</th><th>Firma expeditor</th><th>N° SR</th><th>Nombre conductor</th><th>Firma conductor</th></tr>
+<tr><td></td><td style="font-size:9px">Tel Yusen: &nbsp;+34 93 3287090</td><td></td><td class="c">${esc(C.sr||'')}</td><td class="c">${esc(C.conductor||h.chofer||'')}</td><td></td></tr></table>
+<table class="it"><tr><th style="width:17%">DESTINATARIO</th><th style="width:26%">ARTICULO</th><th style="width:12%">CANTIDAD</th><th style="width:14%">PESO (kg)</th><th>OBSERVACIONES (*)</th></tr>${rows}
+<tr class="tt"><td class="c">CANTIDAD ARTICULOS &nbsp; ${C.items.length}</td><td class="c">CANTIDAD TOTAL BULTOS:</td><td class="c">${C.units}</td><td class="c">${nf(C.kg)}</td><td></td></tr></table>
+<table class="ft"><tr><td>Almacen Yusen:</td><td>Transportista:<br><span class="sm">${esc(h.agencia||'')} · ${esc(h.matricula||'')}</span></td><td>Recibo:</td></tr></table>
+<div class="sm" style="display:flex;justify-content:space-between;margin-top:3px"><span>${fecha} ${hm(h.t_fin)}</span><span>(*) Apilabilidad : 0 = no apilable, 1 = apilable 1 vez, 2 = apilable 2 veces, 3 = apilable 3 veces</span><span></span></div></section>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Carta de porte BITRON ${fecha}</title><style>
+@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#000}
+section{page-break-after:always;width:277mm;height:182mm;position:relative;overflow:hidden;padding-top:5mm}section:last-child{page-break-after:auto}
+table{width:100%;border-collapse:collapse}td,th{border:1px solid #000;padding:2px 5px;font-size:11px;vertical-align:top}th{font-size:8px;font-weight:700;text-align:center}
+.cp{position:absolute;right:0;top:0;font-size:9px;font-weight:700;letter-spacing:.5px}.top{margin-top:0}.top td{height:24mm}
+.lb{font-weight:700;font-size:10px}.big{font-size:22px;font-weight:700;text-align:center;margin-top:6mm}.sm{font-size:8px}.c{text-align:center;vertical-align:middle}.g{color:#1a7a1a}
+.in{width:70%;margin:2px 0 0 16mm}.in td{height:5mm;font-size:9px}.ttl{border:1px solid #000;border-top:0;border-bottom:0;text-align:center;font-weight:700;font-size:12px;padding:1px;border-top:1px solid #000}
+.sg td{height:11mm}.it{margin-top:5mm}.it td{height:7.4mm;font-size:11px}.it th{height:6mm}.tt td{font-weight:700;background:#eee}
+.ft{margin-top:5mm}.ft td{height:34mm;width:33.3%;font-size:10px;font-weight:700}
+</style></head><body>${[0,1,2].map(pg).join('')}</body></html>`;
+}
+
+renderPizarra();
+})();
+</script>
+
+</body></html>                

@@ -2527,25 +2527,15 @@ function dvTrans(m,say){const lg=S.lang,k=m.id+'|'+lg;
 /* --- locución por voz (chófer) --- */
 const VL={es:'es-ES',en:'en-GB',pt:'pt-PT',fr:'fr-FR',ca:'ca-ES'};
 S.mute=localStorage.getItem('yb_mute')=='1';
-function vzSpB(t,save,L){if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;try{const ss=speechSynthesis,lg=L||VL[S.lang]||S.lang,vs=ss.getVoices()||[];
+function vzSp(t,save,L){if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)return;try{const ss=speechSynthesis,lg=L||VL[S.lang]||S.lang,vs=ss.getVoices()||[];
  const v=vs.find(x=>(x.lang||'').replace('_','-').toLowerCase()==lg.toLowerCase())||vs.find(x=>(x.lang||'').toLowerCase().indexOf(lg.slice(0,2).toLowerCase())==0);
  if(vs.length&&!v)return;/* sin voz para este idioma: quedan pitido, vibración y texto */
  if(save){S.last=t;S.lastL=L}if(ss.speaking||ss.pending)ss.cancel();
  t.filter(Boolean).forEach(x=>{const u=new SpeechSynthesisUtterance(String(x).replace(/[⚠❗✅↓↑]/g,'')+' ');u.lang=lg;if(v)u.voice=v;u.rate=.92;u.volume=1;ss.speak(u)})}catch(e){}}
-/* voz neural: mp3 pregrabados en audio/<idioma>/ ; si falta alguno o el navegador lo bloquea → voz del navegador (plan B) */
-const AUDK=['t','sc','sd','wn','fc','fd','pass','dir','cz','wq','dn'],vzA=new Audio();vzA.preload='auto';
-function vzId(x){const L=S.lang;x=String(x);for(const k of AUDK)if(TR[L][K.indexOf(k)]===x)return 'k_'+k;for(const n of [2,3,4])if(x===TR[L][K.indexOf('pass')]+' '+n)return 'k_pass_'+n;for(const q in QP)if(QP[q][L]===x)return 'q_'+q;return ''}
-function vzStop(){S._aq=(S._aq||0)+1;try{vzA.pause()}catch(e){}try{speechSynthesis.cancel()}catch(e){}}
-function vzPlay(t){const tx=t.filter(Boolean),ids=tx.map(vzId);if(!tx.length||ids.some(i=>!i))return false;
- vzStop();const my=S._aq,lg=S.lang;let i=0;
- const fb=()=>{if(my===S._aq)vzSpB(tx.slice(Math.max(0,i-1)),0)};
- const next=()=>{if(my!==S._aq||i>=ids.length)return;vzA.src='audio/'+lg+'/'+ids[i++]+'.mp3';vzA.onended=next;vzA.onerror=fb;const p=vzA.play();if(p&&p.catch)p.catch(fb)};
- next();return true}
-function vzSp(t,save,L){if(save){S.last=t;S.lastL=L}if(!L&&vzPlay(t))return;vzSpB(t,save,L)}
 function vzSay(){if(S.mute)return;vzSp([].slice.call(arguments),1)}
-function vzUn(){try{if(!S._ua){S._ua=1;vzA.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';const p=vzA.play();if(p&&p.catch)p.catch(()=>{S._ua=0})}}catch(e){}try{if(window.speechSynthesis&&!S._un){S._un=1;const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}}
+function vzUn(){try{if(window.speechSynthesis&&!S._un){S._un=1;const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}}
 ['click','touchend'].forEach(e=>document.addEventListener(e,vzUn,{once:true,passive:true}));
-S.vzTog=()=>{S.mute=!S.mute;try{localStorage.setItem('yb_mute',S.mute?'1':'0')}catch(e){}if(S.mute){vzStop()}else vzSp([T('pass')+' 3'],0);draw()};
+S.vzTog=()=>{S.mute=!S.mute;try{localStorage.setItem('yb_mute',S.mute?'1':'0')}catch(e){}if(S.mute){try{speechSynthesis.cancel()}catch(e){}}else vzSp([T('pass')+' 3'],0);draw()};
 S.vzRep=()=>{if(S.last)vzSp(S.last,1,S.lastL)};
 const vzBtns=()=>window.speechSynthesis?`<button onclick="DV.vzTog()" title="Voz">${S.mute?'🔇':'🔊'}</button>`+(S.last&&!S.mute?`<button onclick="DV.vzRep()" title="Repetir">🔁</button>`:''):'';
 let vzL,vzB=0;const wl=async()=>{if(vzB||!S.key||!navigator.wakeLock||document.visibilityState!='visible'||(vzL&&!vzL.released))return;vzB=1;try{vzL=await navigator.wakeLock.request('screen')}catch(e){}vzB=0};
@@ -2557,7 +2547,7 @@ function dvPick(){const L=Object.keys(TR);
 window.dvLang=l=>{if(!TR[l])return;S.lang=l;S.lo=1;try{localStorage.setItem('yb_lang',l)}catch(e){}vzUn();draw();vzSay(T('t'))};
 function dvMsgTxt(m){return m.q&&QP[m.q]?(QP[m.q][S.lang]||QP[m.q].es):(S.tr[m.id+'|'+S.lang]||m.x||'')}
 function dvMsg(){const m=S.showMsg,tr=!m.q&&S.lang!='es'?S.tr[m.id+'|'+S.lang]:'';if(!m.q&&m.x)dvTrans(m,0);return `<div class="al" style="background:rgba(30,58,138,.97);z-index:100001"><div class="ic">💬</div><div class="o" style="margin-bottom:8px;font-weight:700">${esc(QH[S.lang]||QH.es)}</div><div class="m">${esc(dvMsgTxt(m))}</div>${tr&&tr!==m.x?`<div style="font-size:13px;opacity:.65;margin:0 0 14px;max-width:90%">${esc(m.x)}</div>`:''}<button style="color:#1e3a8a" onclick="dvMsgOk()">${T('ent')}</button></div>`}
-window.dvMsgOk=()=>{const m=S.showMsg;S.showMsg=null;try{if(m&&S.key){localStorage.setItem('yb_msg_'+S.key,m.id);fetch(`${fb}/chk/${encodeURIComponent(sala)}/${S.key}.json`,{method:'PATCH',body:JSON.stringify({msgok:m.id})}).catch(()=>{})}}catch(e){}vzStop();draw()};
+window.dvMsgOk=()=>{const m=S.showMsg;S.showMsg=null;try{if(m&&S.key){localStorage.setItem('yb_msg_'+S.key,m.id);fetch(`${fb}/chk/${encodeURIComponent(sala)}/${S.key}.json`,{method:'PATCH',body:JSON.stringify({msgok:m.id})}).catch(()=>{})}}catch(e){}try{speechSynthesis.cancel()}catch(e){}draw()};
 function dvDock(s){const kk=s.ps=='proc'?(s.tipo=='CARGA'?'sc':'sd'):'pass',pos=s.ps=='proc'?0:+s.pos||0,m=s.muelle,o=Object.keys(TR).filter(l=>l!=S.lang),tr=(l,k)=>TR[l][K.indexOf(k)],nm=m==5?'PT':'0'+m;
  let h=pos>0?`<div class="go" style="color:#f59e0b">${T('wq')}</div><div class="bg" style="opacity:.55">${nm}</div><div class="qa"><b>${T('ah')}: ${pos}</b><br>${T('nx')}: <span>${esc(s.am||'')}</span>${s.an?' · '+esc(s.an):''}</div>`
  :s.ps=='proc'?`<div class="st">❗ ${T(kk)}</div><div class="wn">⚠ ${T('wn')}</div><div class="bg">${nm}</div>`:`<div class="go">${T(kk)}</div><div class="bg">${nm}</div>`;

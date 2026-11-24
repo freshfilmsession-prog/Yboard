@@ -2859,6 +2859,7 @@ renderPizarra();
 @media (prefers-reduced-motion:reduce){.rs-it{animation:none}}
 #rs-nav.pend{animation:rsp 1.2s infinite;color:#1c1300;background:#facc15;border-color:#facc15}
 #rs-prev{max-width:100%;max-height:200px;border-radius:10px;margin-top:8px;display:none}
+.rs-filt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rs-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-w);font-size:13px}
 .rs-row small{color:var(--text2);display:block}.rs-row button{background:rgba(255,255,255,.06);border:1px solid var(--border-w);color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer}
 </style>
@@ -2884,7 +2885,16 @@ renderPizarra();
 <div id="rsf-body" style="text-align:center;color:var(--text2)"></div></div></div>
 
 <div class="modal-overlay" id="modal-rslist"><div class="modal-box"><div class="modal-header"><div class="modal-title-w"><div class="modal-title">Registro de <em>reservas</em></div></div><button class="btn-close" onclick="closeModal('modal-rslist')">✕</button></div>
-<div id="rsl-body"></div></div></div>
+<div class="rs-filt">
+<div class="form-group"><label class="form-label">Desde</label><input type="date" id="rsf-d1" class="form-input" onchange="rsFiltrar()"></div>
+<div class="form-group"><label class="form-label">Hasta</label><input type="date" id="rsf-d2" class="form-input" onchange="rsFiltrar()"></div>
+<div class="form-group"><label class="form-label">Cliente</label><select id="rsf-cli" class="form-select" onchange="rsFiltrar()"></select></div>
+<div class="form-group"><label class="form-label">Estado</label><select id="rsf-est" class="form-select" onchange="rsFiltrar()"><option value="">Todas</option><option value="p">Pendientes</option><option value="c">Confirmadas</option></select></div>
+<div class="form-group"><label class="form-label">Motivo</label><select id="rsf-mot" class="form-select" onchange="rsFiltrar()"></select></div>
+<div class="form-group"><label class="form-label">Agencia / matrícula / texto</label><input id="rsf-q" class="form-input" placeholder="DHL, 1234ABC…" oninput="rsFiltrar()"></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0"><span id="rsf-n" style="font-size:12px;color:var(--text2)"></span><button class="nav-btn" onclick="rsLimpiar()" style="height:34px">✕ Limpiar</button></div>
+<div id="rsl-body"></div></div></div></div>
 
 <script>
 (function(){
@@ -3014,10 +3024,23 @@ renderPizarra=function(){
 };
 
 /* ── Registro y botón de acceso ── */
+function rsDia(n){const d=new Date(Date.now()-n*864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 window.rsLista=function(){
-  const lim=Date.now()-60*864e5,L=rsAll().filter(x=>x.r.t>=lim).sort((a,b)=>b.r.t-a.r.t);
-  document.getElementById('rsl-body').innerHTML=L.length?L.map(x=>`<div class="rs-row"><div><b>${new Date(x.r.t).toLocaleDateString('es-ES')} ${new Date(x.r.t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</b> · ${nm(x.m)} · ${esc(x.c.agencia)} · ${esc(x.c.matricula)}<small>${rsDesc(x)}</small><small>${x.r.conf?'✓ Confirmada '+new Date(x.r.tc).toLocaleDateString('es-ES'):'<span style="color:#fbbf24">⚠ Pendiente de anotar en albarán</span>'}</small></div><div style="display:flex;gap:6px;flex-direction:column">${x.r.foto?`<button onclick="rsVer('${x.r.id}')">📷 Foto</button>`:(x.r.purg?'<small>foto archivada</small>':'')}${!x.r.conf&&!x.live?`<button onclick="rsConfirmar('${x.r.id}');rsLista()">✓ Confirmar</button>`:''}</div></div>`).join(''):'<p style="color:var(--text2)">Sin reservas en los últimos 60 días.</p>';
-  openModal('modal-rslist');
+  const g=i=>document.getElementById(i);
+  g('rsf-cli').innerHTML='<option value="">Todos</option>'+LISTA_PROYECTOS.map(x=>'<option>'+esc(x)+'</option>').join('');
+  g('rsf-mot').innerHTML='<option value="">Todos</option>'+[...g('rs-tipo').options].filter(o=>o.value).map(o=>'<option>'+esc(o.value)+'</option>').join('');
+  g('rsf-d1').value=rsDia(30);g('rsf-d2').value='';g('rsf-est').value='';g('rsf-q').value='';
+  rsFiltrar();openModal('modal-rslist');
+};
+window.rsLimpiar=function(){['rsf-d1','rsf-d2','rsf-cli','rsf-est','rsf-mot','rsf-q'].forEach(i=>document.getElementById(i).value='');rsFiltrar();};
+window.rsFiltrar=function(){
+  const v=i=>document.getElementById(i).value,d1=v('rsf-d1')?new Date(v('rsf-d1')+'T00:00:00').getTime():0,d2=v('rsf-d2')?new Date(v('rsf-d2')+'T23:59:59').getTime():Infinity,
+    cli=v('rsf-cli'),est=v('rsf-est'),mot=v('rsf-mot'),q=v('rsf-q').trim().toUpperCase();
+  const L=rsAll().filter(x=>x.r.t>=d1&&x.r.t<=d2&&(!cli||x.c.proyecto===cli)&&(!est||(est==='c')===!!x.r.conf)&&(!mot||x.r.tipo===mot)
+    &&(!q||[x.c.agencia,x.c.matricula,x.r.txt,x.r.tipo].join(' ').toUpperCase().includes(q))).sort((a,b)=>b.r.t-a.r.t);
+  const pend=L.filter(x=>!x.r.conf).length,M=L.slice(0,200);
+  document.getElementById('rsf-n').textContent=L.length+' reserva'+(L.length==1?'':'s')+' · '+pend+' pendiente'+(pend==1?'':'s')+(L.length>200?' (mostrando 200)':'');
+  document.getElementById('rsl-body').innerHTML=M.length?M.map(x=>`<div class="rs-row"><div><b>${new Date(x.r.t).toLocaleDateString('es-ES')} ${new Date(x.r.t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</b> · ${nm(x.m)} · ${esc(x.c.proyecto)} · ${esc(x.c.agencia)} · ${esc(x.c.matricula)}<small>${rsDesc(x)}</small><small>${x.r.conf?'✓ Confirmada '+new Date(x.r.tc).toLocaleDateString('es-ES'):'<span style="color:#fbbf24">⚠ Pendiente de anotar en albarán</span>'}</small></div><div style="display:flex;gap:6px;flex-direction:column">${x.r.foto?`<button onclick="rsVer('${x.r.id}')">📷 Foto</button>`:(x.r.purg?'<small>foto archivada</small>':'')}${!x.r.conf&&!x.live?`<button onclick="rsConfirmar('${x.r.id}');rsFiltrar()">✓ Confirmar</button>`:''}</div></div>`).join(''):'<p style="color:var(--text2)">No hay reservas con estos filtros.</p>';
 };
 const ar=document.querySelector('.admin-bar .admin-right');
 if(ar) ar.insertAdjacentHTML('beforebegin','<button class="nav-btn" id="rs-nav" onclick="rsLista()" style="margin:0 8px;align-self:center;height:36px;white-space:nowrap;">⚠ Reservas</button>');

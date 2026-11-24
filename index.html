@@ -2843,4 +2843,189 @@ renderPizarra();
 })();
 </script>
 
+<style>
+/* ── Reservas de mercancía ── */
+.rs-btn{background:rgba(245,158,11,.12)!important;border-color:rgba(245,158,11,.5)!important;color:#fbbf24!important}
+.rs-chips{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.rs-chip{display:flex;align-items:center;gap:8px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.55);border-radius:10px;padding:8px 10px;font-size:12px;color:#fde68a;line-height:1.3}
+.rs-chip b{color:#fbbf24}.rs-chip .rs-x{margin-left:auto;background:none;border:0;color:#fca5a5;font-size:16px;cursor:pointer;min-width:32px;min-height:32px}
+.rs-dock{padding:8px 10px 0;display:flex;flex-direction:column;gap:8px}
+.rs-it{background:linear-gradient(135deg,#facc15,#f59e0b);color:#1c1300;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:rsp 1.2s infinite}
+.rs-it .ic{font-size:26px}.rs-it b{display:block;font-size:14px;line-height:1.25}.rs-it small{font-size:12px;font-weight:600;display:block;margin-top:2px}
+.rs-it .rs-act{margin-left:auto;display:flex;flex-direction:column;gap:6px}
+.rs-it button{background:#1c1300;color:#fde68a;border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap}
+.rs-it.live{animation:none;opacity:.92}
+@keyframes rsp{0%,100%{box-shadow:0 0 0 0 rgba(250,204,21,.75);filter:brightness(1)}50%{box-shadow:0 0 0 8px rgba(250,204,21,0);filter:brightness(1.25)}}
+@media (prefers-reduced-motion:reduce){.rs-it{animation:none}}
+#rs-nav.pend{animation:rsp 1.2s infinite;color:#1c1300;background:#facc15;border-color:#facc15}
+#rs-prev{max-width:100%;max-height:200px;border-radius:10px;margin-top:8px;display:none}
+.rs-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-w);font-size:13px}
+.rs-row small{color:var(--text2);display:block}.rs-row button{background:rgba(255,255,255,.06);border:1px solid var(--border-w);color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer}
+</style>
+
+<div class="modal-overlay" id="modal-reserva"><div class="modal-box">
+<div class="modal-header"><div class="modal-title-w"><div class="modal-icon">⚠</div><div class="modal-title">Anotar <em>reserva</em></div></div><button class="btn-close" onclick="closeModal('modal-reserva')">✕</button></div>
+<div id="rs-who" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+<div class="form-group"><label class="form-label">Motivo</label>
+<select id="rs-tipo" class="form-select">
+<option value="">— Elegir —</option>
+<option>Pallet roto</option><option>Pallet inestable / mal flejado</option><option>Cajas chafadas</option><option>Cajas rotas</option>
+<option>Falta de material</option><option>Exceso de material</option><option>Mercancía mojada</option><option>Mercancía equivocada</option>
+<option>Precinto roto / sin precinto</option><option>Etiqueta ilegible / sin etiqueta</option><option>Otro</option>
+</select></div>
+<div class="form-group" style="margin-top:12px"><label class="form-label">Detalle (libre)</label><input id="rs-txt" class="form-input" maxlength="300" placeholder="Ej: 2 pallets con cajas aplastadas en la base"></div>
+<div class="form-group" style="margin-top:12px" id="rs-fgrp"><label class="form-label">Foto (opcional)</label>
+<input type="file" id="rs-file" accept="image/*" capture="environment" onchange="rsPick(this)" class="form-input">
+<div id="rs-fnote" style="font-size:11px;color:var(--text2);margin-top:4px"></div><img id="rs-prev" alt=""></div>
+<button class="btn-submit" id="rs-save" style="margin-top:16px" onclick="rsGuardar()">Guardar reserva</button>
+<button class="btn-cancel" onclick="closeModal('modal-reserva')">Cancelar</button></div></div>
+
+<div class="modal-overlay" id="modal-rsfoto"><div class="modal-box"><div class="modal-header"><div class="modal-title-w"><div class="modal-title">Foto de la <em>reserva</em></div></div><button class="btn-close" onclick="closeModal('modal-rsfoto')">✕</button></div>
+<div id="rsf-body" style="text-align:center;color:var(--text2)"></div></div></div>
+
+<div class="modal-overlay" id="modal-rslist"><div class="modal-box"><div class="modal-header"><div class="modal-title-w"><div class="modal-title">Registro de <em>reservas</em></div></div><button class="btn-close" onclick="closeModal('modal-rslist')">✕</button></div>
+<div id="rsl-body"></div></div></div>
+
+<script>
+(function(){
+if(window.__DRV) return;
+const FOTO_DIAS=90, FOTO_MAX=150000; // base64 ≈ 110 KB máx.
+let _rsT=null,_rsFoto=null,_rsSeen=null,_rsSig=null,_cache={};
+const nm=m=>m==5?'Pasillo trasero':'Muelle 0'+m;
+const hace=t=>{const m=Math.max(0,Math.round((Date.now()-t)/6e4));return m>=60?Math.floor(m/60)+' h '+m%60+' min':m+' min'};
+
+function rsAll(){
+  const o=[];
+  MUELLES.forEach(m=>dbMuelles[m].forEach(c=>(c.reservas||[]).forEach(r=>o.push({r,c,m,live:true}))));
+  historico.forEach(h=>(h.reservas||[]).forEach(r=>o.push({r,c:h,m:h.muelle||2,live:false})));
+  return o;
+}
+function rsFindTruck(id){
+  for(const m of MUELLES){const c=dbMuelles[m].find(x=>x.id===id);if(c)return c;}
+  return null;
+}
+const canFoto=()=>!!(fbUrl&&salaActiva&&_es);
+
+/* ── Alta de reserva ── */
+window.rsAbrir=function(m){
+  const c=dbMuelles[m][0]; if(!c) return;
+  _rsT=c.id;_rsFoto=null;
+  document.getElementById('rs-tipo').value='';document.getElementById('rs-txt').value='';
+  document.getElementById('rs-file').value='';document.getElementById('rs-prev').style.display='none';
+  document.getElementById('rs-who').textContent=nm(m)+' · '+c.agencia+' · '+c.matricula;
+  const ok=canFoto(),f=document.getElementById('rs-file');
+  f.disabled=!ok;
+  document.getElementById('rs-fnote').textContent=ok?'Se comprime automáticamente (~100 KB).':'La foto necesita la nube (Firebase) conectada. Sin ella, puedes guardar la reserva solo con texto.';
+  document.getElementById('rs-save').disabled=false;
+  openModal('modal-reserva');
+};
+function rsComprimir(file){
+  return new Promise((res,rej)=>{
+    const img=new Image(),u=URL.createObjectURL(file);
+    img.onload=()=>{URL.revokeObjectURL(u);
+      const s=Math.min(1,900/Math.max(img.width,img.height)),cv=document.createElement('canvas');
+      cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      let q=.7,d=cv.toDataURL('image/jpeg',q);
+      while(d.length>FOTO_MAX&&q>.35){q-=.1;d=cv.toDataURL('image/jpeg',q);}
+      res(d);};
+    img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'));};
+    img.src=u;
+  });
+}
+window.rsPick=function(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  rsComprimir(f).then(d=>{_rsFoto=d;const p=document.getElementById('rs-prev');p.src=d;p.style.display='block';
+    document.getElementById('rs-fnote').textContent='Foto lista · '+Math.round(d.length*.75/1024)+' KB';})
+  .catch(()=>{_rsFoto=null;showToast('⚠ No se pudo leer la foto');});
+};
+const fotoUrl=id=>`${fbUrl}/fotos/${encodeURIComponent(salaActiva)}/${id}.json`;
+window.rsGuardar=async function(){
+  const c=rsFindTruck(_rsT); if(!c){closeModal('modal-reserva');return showToast('El camión ya no está en el muelle');}
+  const tipo=document.getElementById('rs-tipo').value,txt=document.getElementById('rs-txt').value.trim();
+  if(!tipo&&!txt) return showToast('⚠ Elige un motivo o escribe un detalle');
+  const r={id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),tipo,txt,t:Date.now(),conf:0,foto:0,by:DEVICE};
+  const b=document.getElementById('rs-save');
+  if(_rsFoto){
+    b.disabled=true;b.textContent='Subiendo foto…';
+    try{const x=await fetch(fotoUrl(r.id),{method:'PUT',body:JSON.stringify(_rsFoto)});if(!x.ok)throw 0;r.foto=1;r.kb=Math.round(_rsFoto.length*.75/1024);_cache[r.id]=_rsFoto;}
+    catch(_){b.disabled=false;b.textContent='Guardar reserva';return showToast('⚠ No se pudo subir la foto. Reinténtalo o quítala.');}
+    b.textContent='Guardar reserva';
+  }
+  const cc=rsFindTruck(_rsT)||c; cc.reservas=cc.reservas||[];cc.reservas.push(r);
+  closeModal('modal-reserva');renderPizarra();broadcastState();showToast('⚠ Reserva anotada — la oficina la verá en amarillo');
+};
+window.rsQuitar=function(cid,rid){
+  const c=rsFindTruck(cid); if(!c||!confirm('¿Quitar esta reserva?')) return;
+  const r=(c.reservas||[]).find(x=>x.id===rid);
+  if(r&&r.foto&&canFoto()) fetch(fotoUrl(rid),{method:'DELETE'}).catch(()=>{});
+  c.reservas=(c.reservas||[]).filter(x=>x.id!==rid);renderPizarra();broadcastState();
+};
+
+/* ── Confirmación en oficina ── */
+window.rsConfirmar=function(rid){
+  const it=rsAll().find(x=>x.r.id===rid); if(!it) return;
+  if(!confirm('¿Reserva anotada en el albarán?\n\n'+(it.r.tipo||'')+' '+(it.r.txt||'')+'\n\nDejará de parpadear.')) return;
+  it.r.conf=1;it.r.tc=Date.now();_rsSig=null;renderPizarra();broadcastState();showToast('✓ Reserva confirmada');
+};
+
+/* ── Foto bajo demanda (no viaja con el estado) ── */
+window.rsVer=async function(rid){
+  const B=document.getElementById('rsf-body');B.textContent='Cargando…';openModal('modal-rsfoto');
+  try{
+    let d=_cache[rid];
+    if(!d){if(!canFoto())throw 0;const x=await fetch(fotoUrl(rid));d=await x.json();}
+    if(!d){B.textContent='La foto ya no está disponible (archivada).';return;}
+    _cache[rid]=d;B.innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:10px">';
+  }catch(_){B.textContent='No se pudo cargar la foto (¿sin conexión a la nube?).';}
+};
+
+/* ── Pintado en el muelle ── */
+function rsDesc(it){return esc([it.r.tipo,it.r.txt].filter(Boolean).join(' — '));}
+function rsBars(){
+  const P=rsAll().filter(x=>!x.r.conf).sort((a,b)=>a.r.t-b.r.t);
+  const sig=P.map(x=>x.r.id+(x.live?'L':'F')).join(',');
+  const nav=document.getElementById('rs-nav');
+  if(nav){nav.classList.toggle('pend',P.length>0);nav.textContent='⚠ Reservas'+(P.length?' ('+P.length+')':'');}
+  if(sig===_rsSig) return; _rsSig=sig;
+  document.querySelectorAll('.rs-dock').forEach(e=>e.remove());
+  const by={};P.forEach(x=>(by[x.m]=by[x.m]||[]).push(x));
+  Object.keys(by).forEach(m=>{const a=document.getElementById('active-'+m);if(!a)return;
+    a.insertAdjacentHTML('beforebegin','<div class="rs-dock">'+by[m].map(x=>`<div class="rs-it ${x.live?'live':''}"><span class="ic">⚠</span><div><b>RESERVA · ${nm(x.m)} · ${esc(x.c.agencia)} · ${esc(x.c.matricula)}</b><small>${rsDesc(x)} · hace ${hace(x.r.t)}</small><small>${x.live?'Descarga en curso':'Anotar en el albarán y confirmar'}</small></div><div class="rs-act">${x.r.foto?`<button onclick="rsVer('${x.r.id}')">📷 Ver foto</button>`:''}${x.live?'':`<button onclick="rsConfirmar('${x.r.id}')">✓ Anotada en albarán</button>`}</div></div>`).join('')+'</div>');});
+  if(_rsSeen!==null&&P.some(x=>!_rsSeen.has(x.r.id))){try{_beep();}catch(_){}}
+  _rsSeen=new Set(P.map(x=>x.r.id));
+}
+const _rp3=renderPizarra;
+renderPizarra=function(){
+  _rp3.apply(this,arguments);
+  MUELLES.forEach(m=>{
+    const c=dbMuelles[m][0],t=document.querySelector('#active-'+m+' .ctools'); if(!c||!t) return;
+    t.insertAdjacentHTML('beforeend','<button class="rs-btn" onclick="rsAbrir('+m+')">⚠ Reserva</button>');
+    const L=c.reservas||[]; if(!L.length) return;
+    t.insertAdjacentHTML('afterend','<div class="rs-chips">'+L.map(r=>`<div class="rs-chip"><span>⚠</span><span><b>${esc(r.tipo||'Reserva')}</b>${r.txt?' · '+esc(r.txt):''}${r.foto?' · 📷':''}</span>${r.conf?'':`<button class="rs-x" title="Quitar" onclick="rsQuitar(${c.id},'${r.id}')">✕</button>`}</div>`).join('')+'</div>');
+  });
+  rsBars();
+};
+
+/* ── Registro y botón de acceso ── */
+window.rsLista=function(){
+  const lim=Date.now()-60*864e5,L=rsAll().filter(x=>x.r.t>=lim).sort((a,b)=>b.r.t-a.r.t);
+  document.getElementById('rsl-body').innerHTML=L.length?L.map(x=>`<div class="rs-row"><div><b>${new Date(x.r.t).toLocaleDateString('es-ES')} ${new Date(x.r.t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</b> · ${nm(x.m)} · ${esc(x.c.agencia)} · ${esc(x.c.matricula)}<small>${rsDesc(x)}</small><small>${x.r.conf?'✓ Confirmada '+new Date(x.r.tc).toLocaleDateString('es-ES'):'<span style="color:#fbbf24">⚠ Pendiente de anotar en albarán</span>'}</small></div><div style="display:flex;gap:6px;flex-direction:column">${x.r.foto?`<button onclick="rsVer('${x.r.id}')">📷 Foto</button>`:(x.r.purg?'<small>foto archivada</small>':'')}${!x.r.conf&&!x.live?`<button onclick="rsConfirmar('${x.r.id}');rsLista()">✓ Confirmar</button>`:''}</div></div>`).join(''):'<p style="color:var(--text2)">Sin reservas en los últimos 60 días.</p>';
+  openModal('modal-rslist');
+};
+const ar=document.querySelector('.admin-bar .admin-right');
+if(ar) ar.insertAdjacentHTML('beforebegin','<button class="nav-btn" id="rs-nav" onclick="rsLista()" style="margin:0 8px;align-self:center;height:36px;white-space:nowrap;">⚠ Reservas</button>');
+
+/* ── Limpieza: las fotos confirmadas se archivan a los 90 días (el texto de la reserva se conserva) ── */
+function rsPurge(){
+  if(!canFoto()) return; const lim=Date.now()-FOTO_DIAS*864e5; let ch=0;
+  historico.forEach(h=>(h.reservas||[]).forEach(r=>{if(r.foto&&r.conf&&r.t<lim){fetch(fotoUrl(r.id),{method:'DELETE'}).catch(()=>{});r.foto=0;r.purg=1;ch=1;}}));
+  if(ch) broadcastState();
+}
+setTimeout(rsPurge,20000);setInterval(rsPurge,6*3600*1000);
+setInterval(()=>{_rsSig=null;rsBars();},60000); // refresca el "hace X min"
+renderPizarra();
+})();
+</script>
+
 </body></html>

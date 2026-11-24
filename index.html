@@ -3336,6 +3336,17 @@ renderPizarra();
 .pn-act button:hover{background:#fff}
 .pn-empty{grid-column:1/-1;text-align:center;color:#ffe9b8;font:700 24px 'Caveat',cursive;padding:18px}
 .pn-chip{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:2px 10px;border-radius:4px;background:#fdd835;color:#3b2f00;font:700 17px 'Caveat',cursive;cursor:pointer;transform:rotate(-2deg);box-shadow:1px 2px 4px rgba(0,0,0,.4);vertical-align:middle}
+
+.pn-note{cursor:grab}.pn-note:active{cursor:grabbing}
+.pn-note.lift{opacity:.25;filter:grayscale(.6)}
+.pn-grip{touch-action:none;cursor:grab;background:#fdd835!important;font-weight:900}
+#pn-panel.dragging{opacity:.28;pointer-events:none;transition:opacity .15s}
+#pn-ghost{position:fixed;z-index:3000;pointer-events:none;width:170px;padding:12px 10px 10px;background:linear-gradient(170deg,#fff9a8,#ffee58);color:#2b2200;font:700 22px/1.05 'Caveat',cursive;box-shadow:8px 16px 26px rgba(0,0,0,.55);transform:translate(-50%,-30px) rotate(-5deg) scale(1.08);transition:transform .12s;white-space:pre-wrap;word-break:break-word;max-height:120px;overflow:hidden}
+#pn-ghost.over{transform:translate(-50%,-30px) rotate(2deg) scale(1.18)}
+.dock-col.pn-target{outline:3px dashed #fdd835;outline-offset:-4px;background:rgba(253,216,53,.07)!important}
+#pn-gen{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:2900;display:none;padding:8px 22px;border-radius:6px;background:#fff176;color:#3b2f00;font:700 24px 'Caveat',cursive;box-shadow:0 6px 16px rgba(0,0,0,.5);border:2px dashed rgba(90,70,0,.5)}
+#pn-gen.show{display:block;animation:pnOpen .25s}
+#pn-gen.pn-target{background:#ffd600;transform:translateX(-50%) scale(1.12)}
 @media print{#pn-fab,#pn-panel{display:none!important}}
 @media(max-width:900px){#pn-fab{bottom:calc(14px + env(safe-area-inset-bottom));left:10px}#pn-panel{left:8px;bottom:70px;max-height:calc(100dvh - 90px)}}
 </style>
@@ -3352,6 +3363,7 @@ renderPizarra();
   <div class="pn-flt" id="pn-flt"></div>
   <div class="pn-list" id="pn-list"></div>
 </div>
+<div id="pn-gen">📌 General</div>
 <button id="pn-fab" onclick="pnToggle()">📝 Posits <b id="pn-cnt">0</b></button>
 <script>
 (function(){
@@ -3391,7 +3403,7 @@ function render(){
       <span class="pn-txt ${n.done?'d':''}">${esc(n.txt)}</span>
       <div class="pn-exp">caduca en ${resta(n)}</div>
       ${n.by?`<div class="pn-sig">— ${esc(n.by)}</div>`:'<div style="height:22px"></div>'}
-      <div class="pn-act"><button title="${n.done?'Reabrir':'Tachar (hecho)'}" onclick="pnDone(${n.id})">${n.done?'↩':'✔'}</button><button title="Arrancar y tirar" onclick="pnDel(${n.id})">🗑</button></div>
+      <div class="pn-act"><button class="pn-grip" title="Arrastra a un muelle" aria-label="Arrastrar">✥</button><button title="${n.done?'Reabrir':'Tachar (hecho)'}" onclick="pnDone(${n.id})">${n.done?'↩':'✔'}</button><button title="Arrancar y tirar" onclick="pnDel(${n.id})">🗑</button></div>
     </div>`).join(''):'<div class="pn-empty">No hay posits por aquí 🙂</div>';
   }
   L.forEach(n=>vistos.add(n.id));primera=false;chips();
@@ -3413,6 +3425,58 @@ window.pnDel=function(id){
   const fin=()=>{n.del=1;n.u=Date.now();guardar();};
   if(el){el.classList.add('out');setTimeout(fin,450);}else fin();
 };
+
+/* ── arrastrar posit a un muelle ── */
+let D=null,raf=0;
+function objetivo(x,y){
+  const g=$('pn-ghost');if(g)g.style.display='none';
+  const e=document.elementFromPoint(x,y);if(g)g.style.display='';
+  if(!e)return null;
+  if(e.closest('#pn-gen'))return {m:0,el:$('pn-gen')};
+  const c=e.closest('.dock-col[data-muelle]');
+  return c?{m:parseInt(c.dataset.muelle),el:c}:null;
+}
+function marca(t){document.querySelectorAll('.pn-target').forEach(e=>{if(!t||e!==t.el)e.classList.remove('pn-target')});if(t)t.el.classList.add('pn-target');}
+function mover(e){
+  if(!D)return;
+  if(!D.on){if(Math.hypot(e.clientX-D.x0,e.clientY-D.y0)<7)return;empezar();}
+  D.g.style.left=e.clientX+'px';D.g.style.top=e.clientY+'px';
+  const t=objetivo(e.clientX,e.clientY);D.t=t;D.g.classList.toggle('over',!!t);marca(t);D.cy=e.clientY;
+}
+function empezar(){
+  D.on=true;
+  const n=notas.find(x=>x.id===D.id);
+  const g=document.createElement('div');g.id='pn-ghost';g.textContent=n?n.txt:'';document.body.appendChild(g);D.g=g;
+  $('pn-panel').classList.add('dragging');$('pn-gen').classList.add('show');
+  D.el.classList.add('lift');
+  (function loop(){if(!D)return;
+    if(D.cy<90)scrollBy(0,-14);else if(D.cy>innerHeight-90)scrollBy(0,14);
+    raf=requestAnimationFrame(loop);})();
+}
+function soltar(e){
+  document.removeEventListener('pointermove',mover);document.removeEventListener('pointerup',soltar);document.removeEventListener('pointercancel',soltar);
+  if(!D)return;const d=D;D=null;cancelAnimationFrame(raf);
+  if(!d.on)return;
+  const t=e.type==='pointercancel'?null:objetivo(e.clientX,e.clientY);
+  marca(null);d.g.remove();$('pn-panel').classList.remove('dragging');$('pn-gen').classList.remove('show');
+  d.el.classList.remove('lift');
+  const n=notas.find(x=>x.id===d.id);
+  if(t&&n){
+    if(n.m!==t.m){n.m=t.m;n.u=Date.now();filtro='all';showToast('📌 Posit pegado en '+tag(t.m));guardar();}
+    const chip=t.m&&document.querySelector('#col-'+t.m+' .pn-chip');
+    if(chip){chip.style.animation='none';void chip.offsetWidth;chip.style.animation='pnOpen .5s cubic-bezier(.2,1.6,.4,1)';}
+  }
+}
+$('pn-list').addEventListener('pointerdown',e=>{
+  const note=e.target.closest('.pn-note');if(!note||e.button>0)return;
+  const grip=e.target.closest('.pn-grip');
+  if(e.target.closest('button')&&!grip)return;
+  if(e.pointerType!=='mouse'&&!grip)return;   /* en táctil solo desde la asa ✥ (así la lista sigue haciendo scroll) */
+  D={id:+note.dataset.id,el:note,x0:e.clientX,y0:e.clientY,cy:e.clientY,on:false,t:null};
+  document.addEventListener('pointermove',mover);document.addEventListener('pointerup',soltar);document.addEventListener('pointercancel',soltar);
+  if(grip)e.preventDefault();
+});
+
 $('pn-t').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))pnAdd();});
 /* se actualiza con cada repintado de la pizarra (incluye cambios de otros equipos) */
 const _rpn=window.renderPizarra;

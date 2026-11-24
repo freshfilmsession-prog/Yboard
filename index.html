@@ -4,7 +4,7 @@
     <title>Yusen · Control de Muelles</title>
     <meta name="theme-color" content="#010b18">
 
-    <script>window.__DRV=/[?&]chk=/.test(location.search)</script>
+    <script>window.__DRV=/[?&](chk|op)=/.test(location.search)</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
@@ -779,6 +779,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div class="hd-actions">
         <button class="nav-btn primary" onclick="openModal('modal-add')">＋ Nueva Llegada</button>
         <button class="nav-btn" onclick="chkQR()">📲 Check-in QR</button>
+        <button class="nav-btn" onclick="opOpen()">👷 Operarios</button>
         <button class="nav-btn purple" onclick="abrirCalendario()">▦ Previsiones</button>
     <button class="nav-btn blue" id="btn-fb" onclick="abrirFb()">⭐ Feedback</button>
     <button class="nav-btn blue" onclick="abrirKPI()">📈 KPI</button>
@@ -2497,7 +2498,7 @@ window.chkQR=function(){if(!fbUrl||!salaActiva)return showToast('⚠ Entra en un
  if(!document.getElementById('modal-chkqr'))document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-chkqr"><div class="modal-box" style="max-width:380px;text-align:center"><div class="modal-header"><div class="modal-title-w"><div class="modal-icon">📲</div><div class="modal-title">Check-in <em>chófer</em></div></div><button class="btn-close" onclick="closeModal('modal-chkqr')">✕</button></div><div id="chk-qr" style="background:#fff;padding:16px;border-radius:12px;display:inline-block"></div><p id="chk-cd" style="font-weight:700;color:var(--orange);margin-top:10px"></p><p id="chk-url" style="font-size:11px;color:var(--text2);word-break:break-all;margin:12px 0"></p><button class="btn-submit" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('chk-url').textContent);showToast('Enlace copiado')">Copiar enlace</button><button class="btn-submit" style="background:linear-gradient(135deg,var(--blue),#2563eb)" onclick="chkCartel()">🖨 Cartel A4 permanente</button><button class="btn-submit" style="background:linear-gradient(135deg,#b91c1c,#dc2626)" onclick="chkCartel(1)">🖨 Cartel DIARIO (válido 24 h)</button><button class="btn-cancel" onclick="closeModal('modal-chkqr')">Cerrar</button></div></div>`);
  _chkE=0;openModal('modal-chkqr');chkQRdraw();clearInterval(window._chkT);window._chkT=setInterval(chkQRdraw,1e3)};
 /* --- lado chófer (móvil) --- */
-if(!window.__DRV)return;
+if(!window.__DRV||!Q.get('chk'))return;
 const sala=Q.get('chk'),fb=(Q.get('fb')||'').replace(/\/+$/,''),EXP=+Q.get('e')||0,WIN=3e5,MAXR=3,T0=(()=>{let v=+sessionStorage.getItem('yb_s_'+sala);const nv=(performance.getEntriesByType('navigation')[0]||{}).type;if(!v||nv==='navigate'){v=Date.now();sessionStorage.setItem('yb_s_'+sala,v);sessionStorage.removeItem('yb_done_'+sala);sessionStorage.removeItem('yb_den_'+sala)}return v})(),stale=EXP&&T0>EXP,dead=()=>Date.now()>T0+WIN,root=document.createElement('div');root.id='drv';document.body.appendChild(root);
 const K='t cli op d c ag mat merc b p kg nm tel go ok wait pass again exp tmo wq ah nx how dir sd sc fd fc ty cz ent wn dn rq ns'.split(' '),
 TR={es:['Check-in de llegada','Cliente','Operación','↓ Descarga','↑ Carga','Agencia / Transportista','Matrícula','Pedido / Referencia / Mercancía','Bultos','Pallets','Peso (Kg)','Tu nombre (opcional)','Teléfono (opcional)','Registrar llegada','Llegada registrada. Espera indicaciones en ventanilla.','En espera de muelle…','Pase al muelle','Nuevo registro','Este QR no es válido o ha caducado. Solicite un QR nuevo en recepción para iniciar el registro.','Tiempo agotado (5 min). Escanea de nuevo el QR para registrar otra llegada.','Muelle asignado. Espera tu turno.','Vehículos delante de ti','Justo delante','Cómo llegar','Entre los 2 parkings hay un pasillo estrecho. Sitúese delante de la primera puerta azul grande.','¡Se inició la descarga!','¡Se inició la carga!','Se finalizó la descarga. Pase a recoger los papeles por la oficina. Gracias por su visita.','Se finalizó la carga. Pase a recoger los papeles por la oficina. Gracias por su visita.','Gracias por confiar en Yusen Logistics','Es obligatorio utilizar los calzos para las ruedas.','Entendido','El proceso ha comenzado. Asegúrese de que los calzos de las ruedas están colocados y no mueva el camión hasta que el proceso haya finalizado.','Se te ha denegado el acceso. Ponte en contacto en ventanilla para más detalles.','Matrícula y agencia obligatorias','No se pudo enviar'],
@@ -3485,6 +3486,101 @@ window.renderPizarra=function(){const r=_rpn.apply(this,arguments);try{
   if(sig!==window._pnSig){window._pnSig=sig;render();}else chips();
 }catch(e){}return r;};
 render();caduca();setInterval(caduca,60000);
+})();
+</script>
+<style>
+.op-tag{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px}.op-tag span{font-size:11px;font-weight:800;padding:3px 9px;border-radius:12px;color:#fff}
+#modal-ops .op-c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;margin:8px 0}
+#modal-ops .op-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px}
+#modal-ops .op-h i{width:9px;height:9px;border-radius:50%;background:#475569}#modal-ops .op-h i.on{background:#22c55e}
+#modal-ops .op-s{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:12px;color:#fff}
+#modal-ops .op-r{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+#modal-ops .op-r select,#modal-ops .op-r input{background:#0a1428;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px;font-size:13px}
+#modal-ops .op-r input{flex:1;min-width:120px}
+#modal-ops .op-r button{border:0;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;background:#ff7a1a;color:#fff}
+#modal-ops .op-r button.g{background:#334155}
+#opv{position:fixed;inset:0;z-index:99999;overflow:auto;background:#010b18;color:#e6eef7;padding:18px;font-family:Inter,system-ui,sans-serif;text-align:center;max-width:none}
+#opv h1{font-size:22px;margin:10px 0}#opv .pk{display:grid;gap:12px;max-width:420px;margin:20px auto}
+#opv button{font-family:inherit;border:0;color:#fff;border-radius:16px}
+#opv .pk button{padding:20px;font-size:22px;font-weight:800;background:#10283f;border:2px solid #1d3b58}
+#opv .big{font-size:min(30vw,130px);font-weight:900;line-height:1.1;background:#ff7a1a;border-radius:24px;margin:14px auto;max-width:440px;padding:8px}
+#opv .inf{font-size:20px;line-height:1.5;margin:8px 0}#opv .nt{font-size:22px;font-weight:800;background:#10283f;border-left:5px solid #f59e0b;border-radius:12px;padding:12px;margin:12px auto;max-width:440px}
+#opv .act{display:block;width:100%;max-width:440px;margin:18px auto;padding:22px;font-size:26px;font-weight:900;background:#16a34a}
+#opv .lk{background:none;color:#8aa1ba;font-size:14px;text-decoration:underline;margin-top:24px}
+#opv.al{background:#7f1d1d;animation:opf 1s infinite}@keyframes opf{50%{background:#b91c1c}}
+#opv.al .act{background:#fff;color:#7f1d1d}
+</style>
+<script>
+(function(){
+const Q=new URLSearchParams(location.search),OPQ=Q.get('op');
+const ST={av:'Avisado',en:'Enterado',des:'En curso',fin:'Terminado'},STC={av:'#f59e0b',en:'#3b82f6',des:'#22c55e',fin:'#64748b'};
+const mu=m=>m==5?'Pasillo trasero':'Muelle 0'+m,OE=e=>e.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=(b,s,p,m,body)=>fetch(`${b}/ops/${encodeURIComponent(s)}${p}.json`,{method:m||'GET',body:body?JSON.stringify(body):undefined}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
+function watch(b,s,cb){let t=null,es=null;const pull=()=>api(b,s,'').then(d=>cb(d||{})).catch(()=>{});
+ const soon=()=>{clearTimeout(t);t=setTimeout(pull,150)};
+ try{es=new EventSource(`${b}/ops/${encodeURIComponent(s)}.json`);es.addEventListener('put',soon);es.addEventListener('patch',soon)}catch(e){}
+ const iv=setInterval(pull,5000);pull();return()=>{clearInterval(iv);if(es)es.close()}}
+
+/* ───────── OFICINA ───────── */
+if(!OPQ){
+let D={team:{},jobs:{},pres:{}},stop=null,key='',first=true,drafts={},sig='';
+const alive=id=>D.pres[id]&&Date.now()-D.pres[id].t<60000;
+function onData(d){D.team=d.team||{};D.jobs=d.jobs||{};D.pres=d.pres||{};
+ if(!first)Object.entries(D.jobs).forEach(([id,j])=>{const o=window._opPrev&&window._opPrev[id];if(o&&o!==j.st&&D.team[id]){showToast('👷 '+D.team[id].n+': '+ST[j.st]);if(j.st==='en')try{_beep()}catch(e){}}});
+ window._opPrev={};Object.entries(D.jobs).forEach(([id,j])=>window._opPrev[id]=j.st);first=false;
+ const s=JSON.stringify(d);if(s!==sig){sig=s;if(document.getElementById('modal-ops')?.classList.contains('open'))opRender();opChips()}}
+setInterval(()=>{const k=(typeof salaActiva!=='undefined'&&salaActiva&&typeof fbUrl!=='undefined'&&fbUrl)?salaActiva+'|'+fbUrl:'';
+ if(k===key)return;key=k;if(stop)stop();stop=null;first=true;D={team:{},jobs:{},pres:{}};if(k)stop=watch(fbUrl,salaActiva,onData)},2000);
+function opChips(){MUELLES.forEach(m=>{const c=document.getElementById('col-'+m);if(!c)return;const o=c.querySelector('.op-tag');if(o)o.remove();
+ const L=Object.entries(D.jobs).filter(([id,j])=>D.team[id]&&j.m==m&&(j.st!=='fin'||Date.now()-(j.t_fin||j.t)<6e5));if(!L.length)return;
+ const h=c.querySelector('.dock-header');if(h)h.insertAdjacentHTML('afterend','<div class="op-tag">'+L.map(([id,j])=>`<span style="background:${STC[j.st]}">👷 ${OE(D.team[id].n)} · ${ST[j.st]}</span>`).join('')+'</div>')})}
+{const r=window.renderPizarra;window.renderPizarra=function(){const x=r.apply(this,arguments);try{opChips()}catch(e){}return x}}
+function opRender(){const b=document.getElementById('op-body');if(!b)return;const T=Object.entries(D.team);
+ b.innerHTML=T.length?T.map(([id,t])=>{const j=D.jobs[id],d=drafts[id]||{};return`<div class="op-c"><div class="op-h"><i class="${alive(id)?'on':''}"></i>${OE(t.n)}${j?`<span class="op-s" style="background:${STC[j.st]}">${mu(j.m)} · ${ST[j.st]}</span>`:''}</div>
+ <div class="op-r"><select onchange="opDraft('${id}','m',this.value)">${MUELLES.map(m=>`<option value="${m}" ${(d.m||2)==m?'selected':''}>${mu(m)}</option>`).join('')}</select><input placeholder="Nota (ej: material en puerta 4)" value="${OE(d.nota||'')}" oninput="opDraft('${id}','nota',this.value)"><button onclick="opSend('${id}')">Avisar</button>${j?`<button class="g" onclick="opClear('${id}')">Quitar</button>`:''}<button class="g" onclick="opDel('${id}')">🗑</button></div></div>`}).join(''):'<p style="color:var(--text2)">Añade a los operarios para empezar.</p>'}
+const need=()=>{if(typeof fbUrl==='undefined'||!fbUrl||!salaActiva){showToast('⚠ Entra en una sala y activa la ☁ Nube');return false}return true};
+window.opDraft=(id,k,v)=>{(drafts[id]=drafts[id]||{})[k]=v};
+window.opOpen=()=>{if(!need())return;if(!document.getElementById('modal-ops'))document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal-ops"><div class="modal-box" style="max-width:640px"><div class="modal-header"><div class="modal-title-w"><div class="modal-icon">👷</div><div class="modal-title">Avisos a <em>operarios</em></div></div><button class="btn-close" onclick="closeModal('modal-ops')">✕</button></div>
+<div class="op-r" style="display:flex;gap:6px"><input id="op-new" class="form-input" placeholder="Nombre (Sergio, Ana…)" style="flex:1" onkeydown="if(event.key==='Enter')opAdd()"><button class="btn-submit" style="width:auto;padding:0 18px" onclick="opAdd()">＋ Añadir</button></div>
+<div id="op-body"></div><button class="btn-submit" style="margin-top:12px;background:linear-gradient(135deg,var(--blue),#2563eb)" onclick="opQR()">📲 QR / enlace para operarios</button><div id="op-qr" style="text-align:center;margin-top:12px"></div></div></div>`);
+ openModal('modal-ops');opRender()};
+window.opAdd=()=>{const i=document.getElementById('op-new'),n=i.value.trim();if(!n||!need())return;i.value='';const id='o'+Date.now().toString(36);D.team[id]={n};opRender();api(fbUrl,salaActiva,'/team','PATCH',{[id]:{n}}).catch(()=>showToast('⚠ Firebase no deja escribir: permite la ruta /ops en las reglas'))};
+window.opDel=id=>{if(!confirm('¿Quitar a '+D.team[id].n+' de la lista?'))return;delete D.team[id];opRender();api(fbUrl,salaActiva,'/team/'+id,'DELETE').catch(()=>{});api(fbUrl,salaActiva,'/jobs/'+id,'DELETE').catch(()=>{})};
+window.opClear=id=>{delete D.jobs[id];opRender();opChips();api(fbUrl,salaActiva,'/jobs/'+id,'DELETE').catch(()=>{})};
+window.opSend=id=>{const d=drafts[id]||{},m=+(d.m||2),c=(dbMuelles[m]||[])[0],now=Date.now(),
+ j={m,nota:(d.nota||'').trim(),mat:c?c.matricula:'',cli:c?c.proyecto:'',tipo:c?c.tipo:'DESCARGA',st:'av',seq:now,t:now};
+ D.jobs[id]=j;opRender();opChips();api(fbUrl,salaActiva,'/jobs/'+id,'PUT',j).then(()=>showToast('📣 Aviso enviado a '+D.team[id].n)).catch(()=>showToast('⚠ No se pudo enviar el aviso'))};
+window.opQR=()=>{if(!need())return;const u=location.href.split('#')[0].split('?')[0]+'?op='+encodeURIComponent(salaActiva)+'&fb='+encodeURIComponent(fbUrl),el=document.getElementById('op-qr');el.innerHTML='<div id="op-qrc" style="background:#fff;padding:14px;border-radius:12px;display:inline-block"></div><p style="font-size:11px;color:var(--text2);word-break:break-all;margin:10px 0">'+OE(u)+'</p><button class="btn-submit" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+u.replace(/'/g,"%27")+'\');showToast(\'Enlace copiado\')">Copiar enlace</button>';
+ if(window.QRCode)new QRCode(document.getElementById('op-qrc'),{text:u,width:240,height:240,correctLevel:QRCode.CorrectLevel.L})};
+return}
+
+/* ───────── OPERARIO (móvil) ───────── */
+const sala=OPQ,base=(Q.get('fb')||'').replace(/\/+$/,''),root=document.createElement('div');root.id='opv';document.body.appendChild(root);
+let team={},job=null,me=localStorage.getItem('yb_op_'+sala),armed=false,ctx=null,ringT=null,wl=null,hasData=false;
+function arm(){armed=true;try{ctx=ctx||new(window.AudioContext||webkitAudioContext)();ctx.resume()}catch(e){}wake()}
+async function wake(){try{if(navigator.wakeLock&&!wl)wl=await navigator.wakeLock.request('screen'),wl.addEventListener('release',()=>wl=null)}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&armed)wake()});
+function beep(){try{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.4;o.start();o.stop(ctx.currentTime+.3)}catch(e){}if(navigator.vibrate)navigator.vibrate([400,150,400])}
+function ring(on){if(on&&!ringT){beep();ringT=setInterval(beep,2000)}if(!on&&ringT){clearInterval(ringT);ringT=null;if(navigator.vibrate)navigator.vibrate(0)}}
+function set(st){if(!job)return;job.st=st;job['t_'+st]=Date.now();api(base,sala,'/jobs/'+me,'PATCH',{st,['t_'+st]:job['t_'+st]}).catch(()=>{});draw()}
+window.opPick=id=>{me=id;localStorage.setItem('yb_op_'+sala,id);arm();pres();draw()};
+window.opArm=()=>{arm();draw()};window.opSet=set;
+window.opOut=()=>{localStorage.removeItem('yb_op_'+sala);me=null;ring(false);draw()};
+const pres=()=>{if(me&&base)api(base,sala,'/pres/'+me,'PUT',{t:Date.now()}).catch(()=>{})};setInterval(pres,20000);
+function draw(){const alr=armed&&job&&job.st==='av';root.className=alr?'al':'';ring(alr);
+ if(!base){root.innerHTML='<h1>Enlace no válido</h1><p>Pide a la oficina el QR de operarios.</p>';return}
+ if(!me||!team[me]){root.innerHTML='<h1>👷 ¿Quién eres?</h1>'+(hasData?(Object.keys(team).length?'<div class="pk">'+Object.entries(team).map(([id,t])=>`<button onclick="opPick('${id}')">${OE(t.n)}</button>`).join('')+'</div>':'<p>La oficina aún no ha creado la lista de operarios.</p>'):'<p>Cargando…</p>');return}
+ const hd=`<h1>👷 ${OE(team[me].n)}</h1>`,ft='<button class="lk" onclick="opOut()">No soy yo · cambiar de persona</button>';
+ if(!armed){root.innerHTML=hd+'<button class="act" style="background:#ff7a1a" onclick="opArm()">🔔 Activar avisos</button><p class="inf">Toca una vez para activar sonido y mantener la pantalla encendida.</p>'+ft;return}
+ if(!job){root.innerHTML=hd+'<p class="inf" style="margin-top:60px">Sin tareas.<br>Esperando aviso de la oficina…</p>'+ft;return}
+ const car=job.tipo==='CARGA'?'carga':'descarga',info=`<div class="big">${job.m==5?'PT':'0'+job.m}</div><div class="inf"><b>${mu(job.m)}</b><br>${OE((job.cli||'')+(job.mat?' · '+job.mat:''))}</div>${job.nota?'<div class="nt">'+OE(job.nota)+'</div>':''}`;
+ const B={av:`<h1>🔔 NUEVO AVISO</h1>${info}<button class="act" onclick="opSet('en')">Enterado ✔</button>`,
+  en:hd+info+`<button class="act" onclick="opSet('des')">▶ Iniciar ${car}</button>`,
+  des:hd+info+`<button class="act" style="background:#2563eb" onclick="opSet('fin')">⏹ ${car[0].toUpperCase()+car.slice(1)} terminada</button>`,
+  fin:hd+'<div class="big" style="background:#16a34a">✔</div><p class="inf">Terminado. Esperando nuevo aviso…</p>'};
+ root.innerHTML=B[job.st]+(job.st==='av'?'':ft)}
+if(base)watch(base,sala,d=>{team=d.team||{};job=me&&(d.jobs||{})[me]||null;hasData=true;draw()});
+draw();pres();
 })();
 </script>
 </body></html>

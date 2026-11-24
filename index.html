@@ -1061,7 +1061,7 @@ const MUELLES = [2,3,4,5]; // 5 = Pasillo trasero
 const nomMu = m => m == 5 ? 'Pasillo trasero' : 'Muelle 0' + m;
 const LISTA_PROYECTOS = ["BITRON","BITRON CAMION DIARIO","REBOUND","NWT","CBC","SIT&B","TOYOTA","VANTAX","SHIMA SEIKI","OTROS"];
 let dbMuelles = { 2:[], 3:[], 4:[], 5:[] };
-let feedbacks = [], historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
+let notas = [], feedbacks = [], historico = [], previsiones = [], habituales = [], checkInTempId = null, borrados = [], localRev = 0, _undo = null;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isoLocal = d => { d = new Date(d); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 
@@ -1072,7 +1072,7 @@ const LS_SALA  = 'yusen_sala_v2';
 function saveLocal() {
     try {
         localStorage.setItem(LS_STATE, JSON.stringify({
-            dbMuelles, historico, previsiones, habituales, borrados, feedbacks, rev: localRev, ts: Date.now()
+            dbMuelles, historico, previsiones, habituales, borrados, feedbacks, notas, rev: localRev, ts: Date.now()
         }));
     } catch(e) {}
 }
@@ -1085,7 +1085,7 @@ function loadLocal() {
         if (!d.dbMuelles) return;
         dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; });
         historico   = d.historico || [];
-        previsiones = d.previsiones || []; habituales = d.habituales || []; borrados = d.borrados || []; feedbacks = d.feedbacks || []; localRev = d.rev || 0;
+        previsiones = d.previsiones || []; habituales = d.habituales || []; borrados = d.borrados || []; feedbacks = d.feedbacks || []; notas = d.notas || []; localRev = d.rev || 0;
         // Restaurar fechas
         const fixDates = arr => arr.forEach(c => {
             ['t_llegada','t_inicio','t_fin'].forEach(k => { if (c[k]) c[k] = new Date(c[k]); });
@@ -1275,7 +1275,7 @@ function _setupConn(c) {
 }
 
 function _snapshot() {
-    return { dbMuelles, previsiones, historico, habituales, borrados, feedbacks, rev: localRev };
+    return { dbMuelles, previsiones, historico, habituales, borrados, feedbacks, notas, rev: localRev };
 }
 
 function _applySnapshot(p) {
@@ -1306,7 +1306,7 @@ function broadcastState() {
 function connectToOperario() { /* legacy — no usado */ }
 function initNetwork() { /* legacy — no usado */ }
 function exportarEstadoCompleto() {
-    const d = {dbMuelles,historico,previsiones,habituales,feedbacks,version:"4.0",fechaExportacion:new Date().toISOString()};
+    const d = {dbMuelles,historico,previsiones,habituales,feedbacks,notas,version:"4.0",fechaExportacion:new Date().toISOString()};
     const a = document.createElement('a');
     a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(d));
     a.download = `Yusen_Muelles_${isoLocal(new Date())}.json`;
@@ -1321,7 +1321,7 @@ function importarEstadoCompleto(input) {
         try {
             const d = JSON.parse(e.target.result);
             if (d.dbMuelles && d.historico && d.previsiones) {
-                dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; }); historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales; if (d.feedbacks) feedbacks = d.feedbacks;
+                dbMuelles = d.dbMuelles; MUELLES.forEach(m => { dbMuelles[m] = dbMuelles[m] || []; }); historico = d.historico; previsiones = d.previsiones; if (d.habituales) habituales = d.habituales; if (d.feedbacks) feedbacks = d.feedbacks; if (d.notas) notas = d.notas;
                 renderPizarra(); renderReporte();
                 if (document.getElementById('modal-calendario').classList.contains('open')) renderCalendario();
                 broadcastState(); showToast('Estado restaurado con éxito');
@@ -1710,7 +1710,8 @@ function imprimirEtiquetas() {
         .label-barcode { margin:1mm 0; }
         .label-foot { text-align:center; font-size:10px; color:#333; margin-top:auto; }
         @media print { .label:last-child { page-break-after:auto; } }
-    </style></head><body>${etiquetas}</body></html>`);
+    </style></head><body>${etiquetas}
+</body></html>`);
     win.document.close();
     win.onload = () => { win.focus(); win.print(); };
     showToast(`🏷️ Generando ${n} etiqueta${n!==1?'s':''}`);
@@ -2277,6 +2278,8 @@ function mergeRemote(p){
   dbMuelles=dm; historico=[...hist.values()].sort((a,b)=>a.id-b.id); previsiones=[...pv.values()].sort((a,b)=>a.id-b.id);
   const hb=new Map(); [...(lose.habituales||[]),...(win.habituales||[])].forEach(x=>{ if(!B.has(x.id)){ const o=hb.get(x.id); hb.set(x.id,o?{...x,gen:[...new Set([...(o.gen||[]),...(x.gen||[])])]}:x); } }); habituales=[...hb.values()].sort((a,b)=>a.id-b.id);
   borrados=[...B].sort((a,b)=>a-b).slice(-500); localRev=Math.max(localRev,p.rev||0);
+  {const nm=new Map();[...(lose.notas||[]),...(win.notas||[])].forEach(n=>{const o=nm.get(n.id);if(!o||(n.u||0)>=(o.u||0))nm.set(n.id,{...n,del:(n.del||(o&&o.del))?1:0})});
+   const lim=Date.now()-7*864e5;notas=[...nm.values()].filter(n=>!(n.del&&(n.u||0)<lim)).sort((a,b)=>a.id-b.id)}
   {const fm=new Map();[...(lose.feedbacks||[]),...(win.feedbacks||[])].forEach(f=>{const k=f.k||f.id,o=fm.get(k);fm.set(k,{...f,del:(f.del||(o&&o.del))?1:0})});feedbacks=[...fm.values()].sort((a,b)=>a.t-b.t)}
 }
 
@@ -3236,7 +3239,7 @@ function bkEstado(){
 window.rsBackupAbrir=function(){document.getElementById('rsbk-msg').textContent='';bkEstado();openModal('modal-rsbk');};
 window.rsBackup=async function(conFotos){
   const M=document.getElementById('rsbk-msg');
-  const d={dbMuelles,historico,previsiones,habituales,feedbacks,borrados,version:'5.1',fechaExportacion:new Date().toISOString(),sala:salaActiva||''};
+  const d={dbMuelles,historico,previsiones,habituales,feedbacks,notas,borrados,version:'5.1',fechaExportacion:new Date().toISOString(),sala:salaActiva||''};
   if(conFotos){
     if(!canFoto()){M.textContent='⚠ Las fotos necesitan la nube (Firebase) conectada.';return;}
     const F=[];rsAll().forEach(x=>rsFotosDe(x.r).forEach(f=>F.push(f)));d.fotos={};let ok=0,fail=0;
@@ -3284,4 +3287,140 @@ renderPizarra();
 })();
 </script>
 
+
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== BLOC DE POSITS ===== */
+#pn-fab{position:fixed;left:14px;bottom:76px;z-index:880;display:flex;align-items:center;gap:8px;padding:10px 16px;border:0;border-radius:6px 6px 14px 6px;background:linear-gradient(160deg,#fff176,#fdd835);color:#4a3b00;font:700 22px/1 'Caveat','Comic Sans MS',cursive;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 -8px 12px rgba(180,140,0,.18);transform:rotate(-3deg);transition:transform .2s}
+#pn-fab:hover{transform:rotate(0) scale(1.06)}
+#pn-fab b{background:#d32f2f;color:#fff;border-radius:50%;min-width:22px;height:22px;display:none;align-items:center;justify-content:center;font:700 13px 'Inter',sans-serif;padding:0 5px}
+#pn-fab.has b{display:inline-flex}
+
+.pn-exp{font:600 15px 'Caveat',cursive;color:rgba(43,34,0,.55);margin-top:4px}
+#pn-fab.wiggle{animation:pnWig .7s}
+@keyframes pnWig{0%,100%{transform:rotate(-3deg)}20%{transform:rotate(8deg) scale(1.12)}40%{transform:rotate(-9deg) scale(1.12)}60%{transform:rotate(5deg)}80%{transform:rotate(-5deg)}}
+#pn-panel{position:fixed;left:14px;bottom:130px;z-index:890;width:min(430px,calc(100vw - 28px));max-height:calc(100dvh - 190px);display:none;flex-direction:column;border-radius:10px;background:#7a5230 repeating-linear-gradient(45deg,rgba(0,0,0,.06) 0 2px,transparent 2px 5px);border:3px solid #4e3219;box-shadow:0 18px 50px rgba(0,0,0,.65);transform-origin:bottom left}
+#pn-panel.open{display:flex;animation:pnOpen .35s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pnOpen{from{opacity:0;transform:scale(.6) rotate(-6deg)}to{opacity:1;transform:none}}
+.pn-h{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:#ffe9b8;font:700 24px 'Caveat',cursive}
+.pn-h span{cursor:pointer;font:700 18px 'Inter',sans-serif;padding:4px 8px}
+.pn-new{margin:0 10px 8px;padding:10px;border-radius:4px;background:#fff59d;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.pn-new textarea{width:100%;min-height:62px;resize:none;border:0;outline:0;background:repeating-linear-gradient(transparent 0 25px,rgba(120,90,0,.18) 25px 26px);font:600 23px/26px 'Caveat','Comic Sans MS',cursive;color:#2b2200}
+.pn-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.pn-row select,.pn-row input{border:1px dashed rgba(90,70,0,.5);background:rgba(255,255,255,.5);border-radius:4px;padding:5px 6px;font:700 18px 'Caveat',cursive;color:#3b2f00;min-width:0}
+.pn-row input{width:96px}
+.pn-row button{margin-left:auto;border:0;border-radius:4px;padding:6px 14px;background:#f57f17;color:#fff;font:700 20px 'Caveat',cursive;cursor:pointer}
+.pn-row button:active{transform:scale(.94)}
+.pn-flt{display:flex;gap:6px;padding:0 10px 8px;flex-wrap:wrap}
+.pn-flt button{border:0;border-radius:12px;padding:3px 11px;background:rgba(0,0,0,.28);color:#ffe9b8;font:700 17px 'Caveat',cursive;cursor:pointer}
+.pn-flt button.on{background:#fdd835;color:#3b2f00}
+.pn-list{overflow:auto;padding:4px 10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}
+@media(max-width:560px){.pn-list{grid-template-columns:1fr}}
+.pn-note{position:relative;padding:16px 12px 10px;min-height:118px;background:linear-gradient(170deg,#fff9a8 0%,#ffee58 100%);color:#2b2200;box-shadow:2px 6px 10px rgba(0,0,0,.4);transform:rotate(var(--r,0deg));animation:pnDrop .55s cubic-bezier(.2,1.4,.4,1) both;transform-origin:50% 0}
+.pn-note::before{content:'';position:absolute;top:-7px;left:50%;width:46px;height:14px;margin-left:-23px;background:rgba(255,255,255,.45);transform:rotate(-2deg);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.pn-note::after{content:'';position:absolute;right:0;bottom:0;width:26px;height:26px;background:linear-gradient(135deg,transparent 50%,rgba(150,115,0,.28) 50%);}
+.pn-note.nw{animation:pnDrop .55s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pnDrop{0%{opacity:0;transform:translateY(-60px) rotate(calc(var(--r,0deg) + 14deg)) scale(1.25)}100%{opacity:1;transform:rotate(var(--r,0deg))}}
+.pn-note.out{animation:pnOut .5s ease-in forwards}
+@keyframes pnOut{to{opacity:0;transform:translate(60px,140px) rotate(35deg) scale(.7)}}
+.pn-tag{display:inline-block;font:700 15px 'Inter',sans-serif;background:rgba(0,0,0,.12);border-radius:10px;padding:1px 8px;margin-bottom:4px;letter-spacing:.3px}
+.pn-txt{font:700 24px/1.05 'Caveat','Comic Sans MS',cursive;white-space:pre-wrap;word-break:break-word;position:relative;display:inline}
+.pn-txt.d{color:rgba(43,34,0,.5)}
+.pn-note.done{background:linear-gradient(170deg,#f1ecb0,#e3dc7c)}
+.pn-strike{background:linear-gradient(#c62828,#c62828) no-repeat 0 58%/100% 3px}
+.pn-txt.d{background:linear-gradient(#c62828,#c62828) no-repeat 0 58%/100% 3px;animation:pnStrike .45s ease-out}
+@keyframes pnStrike{from{background-size:0 3px}to{background-size:100% 3px}}
+.pn-sig{margin-top:6px;font:700 20px 'Caveat',cursive;color:#5a4600;text-align:right;transform:rotate(-2deg)}
+.pn-act{position:absolute;left:6px;bottom:4px;display:flex;gap:4px}
+.pn-act button{border:0;background:rgba(255,255,255,.55);border-radius:50%;width:30px;height:30px;font-size:15px;cursor:pointer}
+.pn-act button:hover{background:#fff}
+.pn-empty{grid-column:1/-1;text-align:center;color:#ffe9b8;font:700 24px 'Caveat',cursive;padding:18px}
+.pn-chip{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:2px 10px;border-radius:4px;background:#fdd835;color:#3b2f00;font:700 17px 'Caveat',cursive;cursor:pointer;transform:rotate(-2deg);box-shadow:1px 2px 4px rgba(0,0,0,.4);vertical-align:middle}
+@media print{#pn-fab,#pn-panel{display:none!important}}
+@media(max-width:900px){#pn-fab{bottom:calc(14px + env(safe-area-inset-bottom));left:10px}#pn-panel{left:8px;bottom:70px;max-height:calc(100dvh - 90px)}}
+</style>
+<div id="pn-panel">
+  <div class="pn-h">📌 Bloc de posits<span onclick="pnToggle()">✕</span></div>
+  <div class="pn-new">
+    <textarea id="pn-t" maxlength="220" placeholder="Escribe aquí… ej: Si llega Renault, dejé el material preparado en la puerta 4."></textarea>
+    <div class="pn-row">
+      <select id="pn-m"><option value="0">General</option><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo</option></select>
+      <input id="pn-f" maxlength="14" placeholder="Firma">
+      <button onclick="pnAdd()">📌 Pegar</button>
+    </div>
+  </div>
+  <div class="pn-flt" id="pn-flt"></div>
+  <div class="pn-list" id="pn-list"></div>
+</div>
+<button id="pn-fab" onclick="pnToggle()">📝 Posits <b id="pn-cnt">0</b></button>
+<script>
+(function(){
+let filtro='all',vistos=new Set(),primera=true;
+const $=i=>document.getElementById(i);
+const tag=m=>m==0?'General':m==5?'Pasillo':'Muelle 0'+m;
+const rot=id=>((id%9)-4)*0.9;
+const TTL=24*3600*1000;
+const vivas=()=>notas.filter(n=>!n.del&&Date.now()-n.t<TTL);
+function caduca(){let c=0;const ahora=Date.now();notas.forEach(n=>{if(!n.del&&ahora-n.t>=TTL){n.del=1;n.u=ahora;c=1;}});if(c){broadcastState();render();}}
+const resta=n=>{const m=Math.max(0,Math.ceil((TTL-(Date.now()-n.t))/60000));return m>=60?Math.floor(m/60)+' h':m+' min';};
+function pend(){return vivas().filter(n=>!n.done).length}
+try{$('pn-f').value=localStorage.getItem('pn_firma')||''}catch(_){}
+function chips(){
+  MUELLES.forEach(m=>{
+    const col=document.getElementById('col-'+m);if(!col)return;
+    const nm=col.querySelector('.dock-name');if(!nm)return;
+    const n=vivas().filter(x=>!x.done&&x.m==m).length;
+    let c=nm.querySelector('.pn-chip');
+    if(!n){if(c)c.remove();return;}
+    if(!c){c=document.createElement('span');c.className='pn-chip';c.onclick=()=>{filtro=String(m);pnToggle(true);};nm.appendChild(c);}
+    const t='📌 '+n;if(c.textContent!==t)c.textContent=t;
+  });
+}
+function render(){
+  const L=vivas(),P=pend(),f=$('pn-fab');
+  $('pn-cnt').textContent=P;f.classList.toggle('has',P>0);
+  /* nueva nota recibida de otro equipo -> aviso */
+  const nuevos=L.filter(n=>!vistos.has(n.id));
+  if(!primera&&nuevos.some(n=>!n.done)){f.classList.remove('wiggle');void f.offsetWidth;f.classList.add('wiggle');}
+  const fl=[['all','Todas'],['0','General'],['2','M02'],['3','M03'],['4','M04'],['5','Pasillo']];
+  $('pn-flt').innerHTML=fl.map(x=>`<button class="${filtro===x[0]?'on':''}" onclick="pnF('${x[0]}')">${x[1]}</button>`).join('');
+  if($('pn-panel').classList.contains('open')){
+    const V=L.filter(n=>filtro==='all'||String(n.m)===filtro).sort((a,b)=>(a.done-b.done)||(b.id-a.id));
+    $('pn-list').innerHTML=V.length?V.map(n=>`<div class="pn-note ${n.done?'done':''}" data-id="${n.id}" style="--r:${rot(n.id)}deg;${vistos.has(n.id)?'animation:none':''}">
+      <span class="pn-tag">${tag(n.m)}</span><br>
+      <span class="pn-txt ${n.done?'d':''}">${esc(n.txt)}</span>
+      <div class="pn-exp">caduca en ${resta(n)}</div>
+      ${n.by?`<div class="pn-sig">— ${esc(n.by)}</div>`:'<div style="height:22px"></div>'}
+      <div class="pn-act"><button title="${n.done?'Reabrir':'Tachar (hecho)'}" onclick="pnDone(${n.id})">${n.done?'↩':'✔'}</button><button title="Arrancar y tirar" onclick="pnDel(${n.id})">🗑</button></div>
+    </div>`).join(''):'<div class="pn-empty">No hay posits por aquí 🙂</div>';
+  }
+  L.forEach(n=>vistos.add(n.id));primera=false;chips();
+}
+function guardar(){broadcastState();render();}
+window.pnToggle=function(forzar){const p=$('pn-panel');const abrir=forzar===true||!p.classList.contains('open');p.classList.toggle('open',abrir);if(abrir){vistos=new Set(vistos);render();}};
+window.pnF=function(f){filtro=f;render();};
+window.pnAdd=function(){
+  const t=$('pn-t').value.trim();if(!t){$('pn-t').focus();return;}
+  const by=$('pn-f').value.trim();try{localStorage.setItem('pn_firma',by)}catch(_){}
+  const id=Date.now();
+  notas.push({id,txt:t,m:parseInt($('pn-m').value)||0,by,t:id,u:id,done:0,del:0});
+  $('pn-t').value='';guardar();
+};
+window.pnDone=function(id){const n=notas.find(x=>x.id===id);if(!n)return;n.done=n.done?0:1;n.u=Date.now();guardar();};
+window.pnDel=function(id){
+  const n=notas.find(x=>x.id===id);if(!n)return;
+  const el=document.querySelector(`.pn-note[data-id="${id}"]`);
+  const fin=()=>{n.del=1;n.u=Date.now();guardar();};
+  if(el){el.classList.add('out');setTimeout(fin,450);}else fin();
+};
+$('pn-t').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))pnAdd();});
+/* se actualiza con cada repintado de la pizarra (incluye cambios de otros equipos) */
+const _rpn=window.renderPizarra;
+window.renderPizarra=function(){const r=_rpn.apply(this,arguments);try{
+  const sig=JSON.stringify(notas.map(n=>[n.id,n.done,n.del,n.u]))+filtro;
+  if(sig!==window._pnSig){window._pnSig=sig;render();}else chips();
+}catch(e){}return r;};
+render();caduca();setInterval(caduca,60000);
+})();
+</script>
 </body></html>

@@ -3347,6 +3347,70 @@ renderPizarra();
 #pn-gen{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:2900;display:none;padding:8px 22px;border-radius:6px;background:#fff176;color:#3b2f00;font:700 24px 'Caveat',cursive;box-shadow:0 6px 16px rgba(0,0,0,.5);border:2px dashed rgba(90,70,0,.5)}
 #pn-gen.show{display:block;animation:pnOpen .25s}
 #pn-gen.pn-target{background:#ffd600;transform:translateX(-50%) scale(1.12)}
+
+/* ===== POSITS PEGADOS EN EL MUELLE (tamaño completo, 3D, sombra) ===== */
+@media(min-width:901px){#col-5.pn-has{min-height:182px}}
+.pn-stuck{position:absolute;top:calc(100% + 8px);right:12px;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:16px;width:172px;pointer-events:none}
+#col-5 .pn-stuck{top:14px;right:14px;left:auto;bottom:auto;width:auto;flex-direction:row-reverse;align-items:flex-start;gap:18px}
+@media(max-width:900px){#col-5 .pn-stuck{top:64px;width:172px;flex-direction:column;align-items:flex-end;gap:16px}#col-5.pn-has,.dock-col.pn-has{min-height:calc(78px + 132px * var(--n,1))}}
+.pn-stk{--rot:0deg;--rx:4deg;--ry:0deg;--px:50%;
+  position:relative;pointer-events:auto;width:164px;padding:21px 12px 11px;color:#2b2200;isolation:isolate;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.38) 0 15px,rgba(255,255,255,0) 15px),
+    linear-gradient(180deg,rgba(150,110,0,0) 66%,rgba(150,110,0,.15) 100%),
+    linear-gradient(172deg,#fffbc4 0%,#fbed8e 55%,#f3de63 100%);
+  border-radius:1px 1px 3px 1px;
+  box-shadow:0 1px 1px rgba(0,0,0,.22),0 7px 12px -3px rgba(0,0,0,.45);
+  transform-origin:var(--px) 9px;
+  transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--rot));
+  transition:transform .25s ease,box-shadow .25s ease}
+.pn-stk::before{content:'';position:absolute;z-index:-1;left:7%;right:7%;bottom:3px;height:34%;
+  box-shadow:0 13px 13px rgba(0,0,0,.55);transform:rotate(1.6deg)}
+.pn-stk::after{content:'';position:absolute;right:0;bottom:0;width:20px;height:20px;
+  background:linear-gradient(135deg,transparent 50%,rgba(140,105,0,.22) 50%);border-radius:0 0 3px 0}
+.pn-stk:hover,.pn-stk.on{transform:perspective(700px) rotateX(1deg) rotateY(0deg) rotate(calc(var(--rot) * .5)) scale(1.035);
+  box-shadow:0 1px 1px rgba(0,0,0,.22),0 12px 18px -3px rgba(0,0,0,.5)}
+.pn-stk.fresh{animation:pnStick .8s cubic-bezier(.2,.9,.3,1) both}
+.pn-stk.out{animation:pnPeel .42s ease-in forwards;pointer-events:none}
+@keyframes pnStick{
+  0%{opacity:0;transform:perspective(700px) translateY(-26px) rotateX(38deg) rotate(calc(var(--rot) + 11deg)) scale(1.22)}
+  50%{opacity:1;transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(calc(var(--rot) - 3deg)) scale(.99)}
+  72%{transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(calc(var(--rot) + 1.2deg))}
+  100%{transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--rot))}}
+@keyframes pnPeel{to{opacity:0;transform:perspective(700px) translate(26px,70px) rotateX(-30deg) rotate(calc(var(--rot) + 24deg)) scale(.8)}}
+
+/* fijaciones: cada muelle engancha el posit de una forma */
+.pn-fix{position:absolute;z-index:2;left:var(--px);top:-9px;transform:translateX(-50%)}
+.pn-fix.pin{width:19px;height:19px;border-radius:50%;
+  background:radial-gradient(circle at 31% 27%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,0) 22%),
+             radial-gradient(circle at 38% 32%,var(--c1),var(--c2) 58%,var(--c3) 100%);
+  box-shadow:0 3px 4px rgba(0,0,0,.5),inset -2px -3px 4px rgba(0,0,0,.32),inset 1px 1px 2px rgba(255,255,255,.25)}
+.pn-fix.pin::after{content:'';position:absolute;z-index:-1;left:42%;top:58%;width:17px;height:7px;border-radius:50%;
+  background:rgba(0,0,0,.38);filter:blur(2.2px);transform:rotate(38deg);transform-origin:left center}
+.pn-fix.pin.r{--c1:#ff7a6e;--c2:#d32b22;--c3:#7e100b}
+.pn-fix.pin.b{--c1:#6fb2ff;--c2:#1f64d6;--c3:#0c2f78}
+.pn-fix.tape{top:-10px;width:70px;height:20px;transform:translateX(-50%) rotate(-3deg);
+  background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(221,236,255,.42));
+  box-shadow:0 1px 3px rgba(0,0,0,.28);
+  clip-path:polygon(0 0,100% 0,98% 20%,100% 40%,98% 60%,100% 80%,98% 100%,0 100%,2% 80%,0 60%,2% 40%,0 20%)}
+.pn-fix.mag{top:-11px;width:23px;height:23px;border-radius:50%;
+  background:radial-gradient(circle at 33% 28%,#9aa4b0 0 10%,rgba(0,0,0,0) 30%),
+             radial-gradient(circle,#59626d 0 44%,#2b3139 46% 62%,#171b20 64%);
+  box-shadow:0 4px 6px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.1)}
+.pn-stk.fresh .pn-fix.pin,.pn-stk.fresh .pn-fix.mag{animation:pnPin .45s .12s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes pnPin{0%{opacity:0;transform:translateX(-50%) translateY(-22px) scale(1.9)}55%{opacity:1}100%{transform:translateX(-50%)}}
+
+.pn-stk-txt{font:700 20px/1.08 'Caveat','Comic Sans MS',cursive;white-space:pre-wrap;word-break:break-word;color:#2b2200}
+.pn-stk-txt.m{font-size:18px}.pn-stk-txt.s{font-size:16px;line-height:1.1}
+.pn-stk-sig{margin-top:5px;text-align:right;font:700 16px 'Caveat',cursive;color:#5a4600;transform:rotate(-2deg)}
+.pn-stk-act{position:absolute;left:5px;bottom:4px;display:flex;gap:4px;opacity:0;transition:opacity .2s}
+.pn-stk:hover .pn-stk-act,.pn-stk.on .pn-stk-act{opacity:1}
+.pn-stk-act button{border:0;background:rgba(255,255,255,.7);border-radius:50%;width:24px;height:24px;font-size:12px;line-height:1;cursor:pointer;padding:0}
+.pn-stk-act button:hover{background:#fff}
+.pn-more{pointer-events:auto;cursor:pointer;font:700 17px 'Caveat',cursive;color:#3b2f00;background:#fdd835;border-radius:4px;padding:1px 10px;
+  box-shadow:1px 2px 4px rgba(0,0,0,.4);transform:rotate(-2deg)}
+@media print{.pn-stuck{display:none!important}}
+@media(prefers-reduced-motion:reduce){.pn-stk.fresh,.pn-stk.fresh .pn-fix{animation:none}}
 @media print{#pn-fab,#pn-panel{display:none!important}}
 @media(max-width:900px){#pn-fab{bottom:calc(14px + env(safe-area-inset-bottom));left:10px}#pn-panel{left:8px;bottom:70px;max-height:calc(100dvh - 90px)}}
 </style>
@@ -3377,7 +3441,58 @@ function caduca(){let c=0;const ahora=Date.now();notas.forEach(n=>{if(!n.del&&ah
 const resta=n=>{const m=Math.max(0,Math.ceil((TTL-(Date.now()-n.t))/60000));return m>=60?Math.floor(m/60)+' h':m+' min';};
 function pend(){return vivas().filter(n=>!n.done).length}
 try{$('pn-f').value=localStorage.getItem('pn_firma')||''}catch(_){}
+
+/* ── posits pegados en cada muelle ── */
+const FIX={
+  2:{t:'pin',k:'r',px:50,rot:-2.2,rx:4,ry:-3},
+  3:{t:'pin',k:'b',px:76,rot:3.2,rx:5,ry:3},
+  4:{t:'tape',px:50,rot:-1.4,rx:3,ry:0},
+  5:{t:'mag',px:22,rot:1.8,rx:4,ry:2}
+};
+let pegInit=false;const pegSeen=new Set();
+function pegados(){
+  MUELLES.forEach(m=>{
+    const col=document.getElementById('col-'+m);const hd=col&&col.querySelector(':scope > .dock-header');
+    if(!hd)return;
+    const f=FIX[m]||FIX[2];
+    const L=vivas().filter(x=>!x.done&&x.m==m).sort((a,b)=>b.id-a.id);
+    const vis=L.slice(0,3),extra=L.length-vis.length;
+    let box=hd.querySelector(':scope > .pn-stuck');
+    col.classList.toggle('pn-has',vis.length>0);col.style.setProperty('--n',vis.length||1);
+    if(!vis.length){if(box)box.remove();return;}
+    if(!box){
+      box=document.createElement('div');box.className='pn-stuck';hd.appendChild(box);
+      box.addEventListener('click',e=>{
+        if(e.target.closest('.pn-more')){filtro=String(m);pnToggle(true);return;}
+        const st=e.target.closest('.pn-stk');if(!st)return;
+        const b=e.target.closest('button[data-a]');
+        if(b){
+          const id=+st.dataset.id;st.classList.add('out');
+          setTimeout(()=>{b.dataset.a==='done'?window.pnDone(id):window.pnDel(id);},400);
+          return;
+        }
+        const was=st.classList.contains('on');
+        box.querySelectorAll('.pn-stk.on').forEach(x=>x.classList.remove('on'));
+        if(!was)st.classList.add('on');
+      });
+    }
+    const sig=vis.map(n=>[n.id,n.txt,n.by,n.u].join('~')).join('|')+'|'+extra;
+    if(box.dataset.sig===sig)return;
+    box.dataset.sig=sig;
+    box.innerHTML=vis.map(n=>{
+      const key=n.id+'@'+m,fresh=pegInit&&!pegSeen.has(key);
+      const j=((n.id%7)-3)*0.45,len=n.txt.length,sz=len>110?'s':len>55?'m':'';
+      const fx=f.t==='pin'?`<i class="pn-fix pin ${f.k}"></i>`:f.t==='tape'?'<i class="pn-fix tape"></i>':'<i class="pn-fix mag"></i>';
+      return `<div class="pn-stk ${fresh?'fresh':''}" data-id="${n.id}" style="--rot:${(f.rot+j).toFixed(2)}deg;--rx:${f.rx}deg;--ry:${f.ry}deg;--px:${f.px}%">
+        ${fx}<div class="pn-stk-txt ${sz}">${esc(n.txt)}</div>${n.by?`<div class="pn-stk-sig">— ${esc(n.by)}</div>`:'<div style="height:14px"></div>'}
+        <div class="pn-stk-act"><button data-a="done" title="Hecho">✔</button><button data-a="del" title="Arrancar y tirar">🗑</button></div></div>`;
+    }).join('')+(extra>0?`<div class="pn-more">+${extra} más</div>`:'');
+    vis.forEach(n=>pegSeen.add(n.id+'@'+m));
+  });
+  pegInit=true;
+}
 function chips(){
+  pegados();
   MUELLES.forEach(m=>{
     const col=document.getElementById('col-'+m);if(!col)return;
     const nm=col.querySelector('.dock-name');if(!nm)return;

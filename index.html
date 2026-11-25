@@ -2454,7 +2454,7 @@ function chkRender(){if(window.__DRV)return;try{chkFb()}catch(e){}let t=document
  const L=Object.entries(_chk).filter(([k,v])=>v&&v.matricula&&!v.muelle&&!v.den).sort((a,b)=>a[1].t-b[1].t),min=t.classList.contains('min');
  t.style.display=L.length?'block':'none';
  t.innerHTML=`<div class="chk-h" onclick="document.getElementById('chk-tray').classList.toggle('min')">📥 Llegadas sin asignar <b>${L.length}</b></div>`+L.map(([k,v])=>`<div class="chk-c"><div class="chk-m">${esc(v.matricula)}</div><div class="chk-s">${esc(v.proyecto)} · ${esc(v.agencia)} · ${v.tipo=='CARGA'?'↑ Carga':'↓ Descarga'}<br>${v.bultos||0} bultos · ${v.pallets||0} pallets · ${v.kg||0} kg${v.merc?' · '+esc(v.merc):''}${v.chofer?'<br>👤 '+esc(v.chofer)+(v.tel?' · <a href="tel:'+esc(v.tel)+'">'+esc(v.tel)+'</a>':''):''}<br><i>hace <span data-chk="${v.t}"></span></i></div><div class="chk-b">${MUELLES.map(m=>`<button onclick="chkGo('${k}',${m})">${m==5?'PT':'0'+m}</button>`).join('')}<button class="s" onclick="chkInb('${k}')">🏷</button><button class="s" title="Enviar mensaje" onclick="msgOpen('${k}')">💬</button><button class="s" title="Denegar acceso" onclick="chkDel('${k}')">✕</button></div></div>`).join('');
- if(min)t.classList.add('min');chkTick();msgRender()}
+ if(min)t.classList.add('min');chkTick();msgRender();try{window.__pgTick&&window.__pgTick()}catch(e){}}
 function chkTick(){document.querySelectorAll('[data-chk]').forEach(e=>e.textContent=Math.max(0,Math.round((Date.now()-e.dataset.chk)/6e4))+' min')}
 setInterval(chkTick,20000);
 /* --- mensajes de la torre de control al conductor --- */
@@ -3848,9 +3848,27 @@ let last=null,lastLv=0,mi=0,ov=0,ovT=0,born=Date.now();
 $('pg').querySelector('.pg-hearts').innerHTML=[0,1,2,3,4].map(()=>'<span class="h"><i style="width:0">♥</i>♥</span>').join('');
 const hs=[...pg.querySelectorAll('.pg-hearts .h i')];
 
+/* Fuentes de registros QR de hoy (se suman, así si una falla las otras cuentan igual):
+   1) _chk (llegadas en vivo)  2) consulta propia a Firebase  3) camiones ya asignados / finalizados con chkKey */
+let extra={};
+async function pollExtra(){
+  try{
+    const sala=(typeof salaActiva!=='undefined'&&salaActiva)||(typeof LS_SALA!=='undefined'&&localStorage.getItem(LS_SALA))||'';
+    if(!sala||typeof fbUrl==='undefined'||!fbUrl)return;
+    const r=await fetch(fbUrl+'/chk/'+encodeURIComponent(sala)+'.json');
+    if(!r.ok)return;const d=await r.json();extra=(d&&typeof d==='object')?d:{};
+  }catch(_){}
+}
 function leer(){
   let nuevo=false;const t0=hoy0();
-  try{const src=(window.__chkGet?window.__chkGet():null)||{};Object.entries(src).forEach(([k,v])=>{if(v&&v.matricula&&+v.t>=t0&&!keys.has(k)){keys.add(k);nuevo=true}})}catch(e){console.warn('Coo: no pude leer registros',e)}
+  const add=(k,t)=>{if(k&&+t>=t0&&!keys.has(k)){keys.add(k);nuevo=true}};
+  try{const src=(window.__chkGet?window.__chkGet():null)||{};Object.entries(src).forEach(([k,v])=>{if(v&&v.matricula)add(k,v.t)})}catch(e){console.warn('Coo: no pude leer _chk',e)}
+  try{Object.entries(extra).forEach(([k,v])=>{if(v&&v.matricula)add(k,v.t)})}catch(_){}
+  try{
+    const cam=c=>{if(c&&c.chkKey){const t=c.t_chk||c.t_llegada;add(c.chkKey,t?new Date(t).getTime():0)}};
+    if(typeof dbMuelles!=='undefined')Object.values(dbMuelles||{}).forEach(l=>(l||[]).forEach(cam));
+    if(typeof historico!=='undefined')(historico||[]).forEach(cam);
+  }catch(_){}
   return nuevo;
 }
 function anim(cls,ms){const hw=pg.querySelector('.pg-hw');hw.classList.remove('hop','shake','spin');void hw.getBBox();hw.classList.add(cls);setTimeout(()=>hw.classList.remove(cls),ms)}
@@ -3868,15 +3886,16 @@ function render(n){
   hs.forEach((h,i)=>{h.style.width=Math.max(0,Math.min(1,pts-i))*100+'%'});
   if(+pg.dataset.lv!==lv){pg.dataset.lv=lv;mi=0}
   pg.setAttribute('aria-label','Coo, la paloma del registro por QR: nivel '+lv+' de 5, '+n+' registros hoy');
-  if(last!==null&&n>last&&Date.now()-born>8000){
-    if(lv>lastLv){anim('spin',1300);flotar('¡Nivel '+lv+'! ✨')}else{anim('hop',700);flotar('+½ ♥')}
-  }
-  last=n;lastLv=lv;msg();
+  const sube=last!==null&&n>last&&Date.now()-born>8000,nivel=lv>lastLv;
+  last=n;lastLv=lv;
+  try{msg()}catch(e){console.warn('Coo msg',e)}
+  if(sube){try{if(nivel){anim('spin',1300);flotar('¡Nivel '+lv+'! ✨')}else{anim('hop',700);flotar('+½ ♥')}}catch(e){console.warn('Coo anim',e)}}
 }
 function tick(){
   if(dkey()!==day){day=dkey();keys=new Set();save();last=null;lastLv=0;mi=0}   /* a las 00:00 vuelve a empezar */
-  if(leer())save();
-  render(keys.size);place();
+  try{if(leer())save()}catch(e){console.warn('Coo leer',e)}
+  try{render(keys.size)}catch(e){console.warn('Coo render',e)}
+  try{place()}catch(e){}
 }
 function place(){
   const c=$('col-5');if(!c||!c.offsetWidth)return;
@@ -3893,8 +3912,11 @@ if(typeof _fam==='function'){window.finalizarAsignacionMuelle=function(){
 const _cr=window.chkRender;
 if(typeof _cr==='function'){window.chkRender=function(){const r=_cr.apply(this,arguments);try{tick()}catch(_){}return r}}
 window.__pgCount=()=>keys.size;
+window.__pgDebug=()=>({n:keys.size,keys:[...keys],chk:Object.keys((window.__chkGet&&window.__chkGet())||{}),extra:Object.keys(extra),sala:typeof salaActiva!=='undefined'?salaActiva:null,fb:typeof fbUrl!=='undefined'?fbUrl:null});
+setInterval(pollExtra,5000);setTimeout(pollExtra,600);
 setInterval(()=>{mi++;msg()},9000);
-setInterval(()=>{try{tick()}catch(_){}},2000);
+window.__pgTick=tick;
+setInterval(()=>{try{tick()}catch(_){}},1000);
 window.addEventListener('resize',place);
 setTimeout(()=>{try{tick()}catch(_){}},400);
 })();

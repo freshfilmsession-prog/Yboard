@@ -3620,14 +3620,14 @@ render();caduca();setInterval(caduca,60000);
 #pg .pg-svg{display:block;overflow:visible;width:100px;height:123px}
 @media(max-width:900px){#pg .pg-svg{width:84px;height:103px}#pg .pg-bub{max-width:126px;font-size:16px;margin-bottom:46px}}
 .pg-sh{fill:rgba(0,0,0,.32)}
-#pg .body{fill:url(#pgG1)}
+#pg .body{fill:var(--pgb)}#pg .vest{fill:var(--pgbe)}#pg .hat{fill:var(--pgl)}#pg .lid{fill:var(--pgb)}
 #pg .wing{fill:var(--pgw)}
 #pg .belly{fill:var(--pgbe)}
 #pg .curl{stroke:var(--pgw);fill:none;stroke-width:3;stroke-linecap:round}
 #pg .ck{fill:#ff8fb0;opacity:0;transition:opacity .8s}
 #pg .oj{fill:#6d5f9a;opacity:0;transition:opacity .8s}
 #pg[data-lv="0"] .oj{opacity:.7}#pg[data-lv="1"] .oj{opacity:.38}#pg[data-lv="2"] .oj{opacity:.12}
-#pg[data-lv="2"] .ck{opacity:.32}#pg[data-lv="3"] .ck{opacity:.65}#pg[data-lv="4"] .ck{opacity:.85}#pg[data-lv="5"] .ck{opacity:1}
+#pg[data-lv="2"] .ck{opacity:.32}#pg[data-lv="3"] .ck{opacity:.65}#pg[data-lv="4"] .ck{opacity:.85}#pg.ge5 .ck{opacity:1}
 
 /* qué se ve en cada nivel */
 #pg .x,#pg .eyes,#pg .m{display:none}
@@ -3636,12 +3636,12 @@ render();caduca();setInterval(caduca,60000);
 #pg[data-lv="0"] .eyes-sleepy,#pg[data-lv="1"] .eyes-sleepy{display:inline}
 #pg[data-lv="2"] .eyes-open,#pg[data-lv="3"] .eyes-open{display:inline}
 #pg[data-lv="4"] .eyes-spark{display:inline}
-#pg[data-lv="5"] .eyes-happy{display:inline}
-#pg[data-lv="1"] .m-open,#pg[data-lv="4"] .m-open,#pg[data-lv="5"] .m-open{display:inline}
+#pg.ge5 .eyes-happy{display:inline}
+#pg[data-lv="1"] .m-open,#pg[data-lv="4"] .m-open,#pg.ge5 .m-open{display:inline}
 #pg[data-lv="3"] .m-smile{display:inline}
 #pg[data-lv="2"] .x-cup,#pg[data-lv="4"] .x-note{display:inline}
-#pg[data-lv="5"] .x-hat,#pg[data-lv="5"] .x-cf,#pg[data-lv="5"] .x-heart{display:inline}
-#pg[data-lv="5"] .curl{display:none}
+#pg.ge5 .x-hat,#pg.ge5 .x-cf,#pg.ge5 .x-heart{display:inline}
+#pg.ge5 .curl{display:none}
 
 /* transform-origin */
 #pg .pg-bird{transform-origin:60px 112px}
@@ -3659,18 +3659,18 @@ render();caduca();setInterval(caduca,60000);
 #pg[data-lv="2"] .pg-bird{animation:pgSipB 4.2s ease-in-out infinite}
 #pg[data-lv="3"] .pg-bird{animation:pgHop 1.1s ease-in-out infinite}
 #pg[data-lv="4"] .pg-bird{animation:pgSway 1.5s ease-in-out infinite}
-#pg[data-lv="5"] .pg-bird{animation:pgDance .8s ease-in-out infinite}
+#pg.ge5 .pg-bird{animation:pgDance .8s ease-in-out infinite}
 #pg[data-lv="0"] .wing{animation:pgWdroop 5.5s ease-in-out infinite}
 #pg[data-lv="1"] .wing{animation:pgWyawn 5s ease-in-out infinite}
 #pg[data-lv="3"] .wing{animation:pgWflut .55s ease-in-out infinite}
 #pg[data-lv="4"] .wing{animation:pgWflap .5s ease-in-out infinite}
-#pg[data-lv="5"] .wing{animation:pgWflapHi .4s ease-in-out infinite}
+#pg.ge5 .wing{animation:pgWflapHi .4s ease-in-out infinite}
 #pg[data-lv="0"] .eyes-sleepy{animation:pgBlinkSlow 6s infinite}
 #pg[data-lv="1"] .eyes-sleepy{animation:pgEyeSq 5s infinite}
 #pg[data-lv="2"] .eyes-open,#pg[data-lv="3"] .eyes-open{animation:pgBlink 4.5s infinite}
 #pg[data-lv="1"] .m-open{animation:pgYawnM 5s ease-in-out infinite}
 #pg[data-lv="4"] .m-open{animation:pgSing .55s ease-in-out infinite alternate}
-#pg[data-lv="5"] .m-open{animation:pgBigM .8s ease-in-out infinite}
+#pg.ge5 .m-open{animation:pgBigM .8s ease-in-out infinite}
 #pg .cup{animation:pgSip 4.2s ease-in-out infinite}
 #pg .steam path{animation:pgSteam 2s ease-in-out infinite}#pg .steam path+path{animation-delay:.9s}
 #pg .st{animation:pgTw 1.2s ease-in-out infinite}#pg .st+.st{animation-delay:.6s}
@@ -3682,7 +3682,7 @@ render();caduca();setInterval(caduca,60000);
 #pg .x-cf{animation:pgCf 2s linear infinite;animation-delay:var(--dl,0s);animation-duration:var(--du,2s)}
 #pg .x-heart{animation:pgHeart 2.4s ease-out infinite}#pg .hh2{animation-delay:.8s}#pg .hh3{animation-delay:1.6s}
 #pg .x-hat{animation:pgHat .8s ease-in-out infinite}
-#pg[data-lv="5"] .fl{animation:pgFtL .8s infinite}#pg[data-lv="5"] .fr{animation:pgFtR .8s infinite}
+#pg.ge5 .fl{animation:pgFtL .8s infinite}#pg.ge5 .fr{animation:pgFtR .8s infinite}
 
 @keyframes pgSad{0%,100%{transform:translateY(3px) rotate(0) scale(1,.97)}40%{transform:translateY(5px) rotate(-3deg) scale(1.02,.94)}70%{transform:translateY(3px) rotate(2deg) scale(1,.97)}}
 @keyframes pgWdroop{0%,100%{transform:rotate(calc(var(--s)*-7deg))}50%{transform:rotate(calc(var(--s)*-11deg))}}
@@ -3732,89 +3732,37 @@ render();caduca();setInterval(caduca,60000);
   <div class="pg-bub"><div class="pg-msg"></div><div class="pg-hearts"></div></div>
   <div class="pg-box">
 <svg class="pg-svg" viewBox="0 -18 120 148" aria-hidden="true">
-  <defs>
-    <radialGradient id="pgG1" cx="38%" cy="28%" r="85%"><stop offset="0" style="stop-color:var(--pgl)"/><stop offset="1" style="stop-color:var(--pgb)"/></radialGradient>
-    <linearGradient id="pgIr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b79cf5"/><stop offset="1" stop-color="#63d8b9"/></linearGradient>
-  </defs>
+  <defs></defs>
   <ellipse class="pg-sh" cx="60" cy="119" rx="34" ry="5"/>
-
-  <g class="x x-cloud"><g class="cl">
-    <ellipse cx="40" cy="-4" rx="16" ry="8" fill="#6f7a92"/><ellipse cx="57" cy="-9" rx="15" ry="9.5" fill="#7a8599"/>
-    <ellipse cx="74" cy="-4" rx="14" ry="7.5" fill="#6f7a92"/><ellipse cx="57" cy="-2" rx="22" ry="6" fill="#68728a"/></g>
-    <path class="rd rd1" d="M46 6 v6" stroke="#8fd3ff" stroke-width="2.2" stroke-linecap="round"/>
-    <path class="rd rd2" d="M60 6 v6" stroke="#8fd3ff" stroke-width="2.2" stroke-linecap="round"/>
-    <path class="rd rd3" d="M73 6 v6" stroke="#8fd3ff" stroke-width="2.2" stroke-linecap="round"/>
-  </g>
-
+  <g class="x x-cloud"><g class="cl"><ellipse cx="40" cy="-4" rx="16" ry="8" fill="#6f7a92"/><ellipse cx="57" cy="-9" rx="15" ry="9.5" fill="#7a8599"/><ellipse cx="74" cy="-4" rx="14" ry="7.5" fill="#6f7a92"/><ellipse cx="57" cy="-2" rx="22" ry="6" fill="#68728a"/></g></g>
   <g class="pg-hw"><g class="pg-bird">
-    <g class="ft fl"><rect x="45.5" y="104" width="3" height="9" rx="1.5" fill="#f08e68"/><ellipse cx="47" cy="114" rx="7" ry="3.2" fill="#f4a07a"/></g>
-    <g class="ft fr"><rect x="71.5" y="104" width="3" height="9" rx="1.5" fill="#f08e68"/><ellipse cx="73" cy="114" rx="7" ry="3.2" fill="#f4a07a"/></g>
-    <path class="wing wl" d="M25 60 Q3 72 13 98 Q31 93 33 72Z"/>
-    <path class="wing wr" d="M95 60 Q117 72 107 98 Q89 93 87 72Z"/>
-    <ellipse class="body" cx="60" cy="68" rx="40" ry="38"/>
-    <ellipse class="belly" cx="60" cy="80" rx="25" ry="22"/>
-    <path class="curl" d="M58 31 Q51 19 62 17 Q60 24 65 29"/>
-    <ellipse cx="27" cy="60" rx="5.5" ry="9" fill="url(#pgIr)" opacity=".4" transform="rotate(14 27 60)"/>
-    <ellipse cx="93" cy="60" rx="5.5" ry="9" fill="url(#pgIr)" opacity=".4" transform="rotate(-14 93 60)"/>
-    <ellipse class="ck" cx="30" cy="77" rx="7" ry="4.5"/><ellipse class="ck" cx="90" cy="77" rx="7" ry="4.5"/>
-    <ellipse class="oj" cx="44" cy="72" rx="9" ry="3"/><ellipse class="oj" cx="76" cy="72" rx="9" ry="3"/>
-
-    <g class="eyes eyes-sleepy">
-      <path d="M37 62 A7 7 0 0 0 51 62Z" fill="#2a2433"/><path d="M69 62 A7 7 0 0 0 83 62Z" fill="#2a2433"/>
-      <path d="M36 62 H52 M68 62 H84" stroke="#2a2433" stroke-width="2.4" stroke-linecap="round"/>
-      <circle cx="42" cy="65" r="1.5" fill="#fff"/><circle cx="74" cy="65" r="1.5" fill="#fff"/>
-    </g>
-    <g class="eyes eyes-open">
-      <circle cx="44" cy="62" r="7.5" fill="#2a2433"/><circle cx="76" cy="62" r="7.5" fill="#2a2433"/>
-      <circle cx="41.5" cy="59.5" r="2.8" fill="#fff"/><circle cx="73.5" cy="59.5" r="2.8" fill="#fff"/>
-      <circle cx="46.5" cy="65" r="1.4" fill="#fff"/><circle cx="78.5" cy="65" r="1.4" fill="#fff"/>
-    </g>
-    <g class="eyes eyes-spark">
-      <circle cx="44" cy="62" r="8.6" fill="#2a2433"/><circle cx="76" cy="62" r="8.6" fill="#2a2433"/>
-      <circle cx="41" cy="59" r="3.2" fill="#fff"/><circle cx="73" cy="59" r="3.2" fill="#fff"/>
-      <path class="st" d="M47 66 l1 -2.6 l1 2.6 l2.6 1 l-2.6 1 l-1 2.6 l-1 -2.6 l-2.6 -1z" fill="#fff"/>
-      <path class="st" d="M79 66 l1 -2.6 l1 2.6 l2.6 1 l-2.6 1 l-1 2.6 l-1 -2.6 l-2.6 -1z" fill="#fff"/>
-    </g>
-    <g class="eyes eyes-happy" fill="none" stroke="#2a2433" stroke-width="3.4" stroke-linecap="round">
-      <path d="M37 64 Q44 53 51 64"/><path d="M69 64 Q76 53 83 64"/>
-    </g>
-    <path class="x x-brow" d="M33 54 L52 48 M68 48 L87 54" stroke="#4a4358" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-
-    <g class="m m-open"><ellipse cx="60" cy="82" rx="6" ry="5" fill="#7a2f4a"/><ellipse cx="60" cy="84.5" rx="3.4" ry="2" fill="#ff8fa8"/></g>
-    <path class="beak" d="M53 68 Q60 63 67 68 Q63 77 60 78 Q57 77 53 68Z" fill="#f6a96b"/>
-    <path class="m m-frown" d="M54 86 Q60 80 66 86" stroke="#6a5a66" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <path class="m m-smile" d="M53 82 Q60 90 67 82" stroke="#8a5a44" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <path class="x x-tear" d="M80 70 q-3.2 5 0 7.4 q3.2 -2.4 0 -7.4z" fill="#8fd3ff"/>
-
-    <g class="x x-cup"><g class="cup">
-      <rect x="82" y="84" width="17" height="15" rx="3.5" fill="#fff"/><ellipse cx="90.5" cy="84.5" rx="8.5" ry="2.4" fill="#8b5a3c"/>
-      <path d="M99 88 q6 0 5 6 q-1 4 -5 4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <g class="steam" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round"><path d="M87 80 q-3 -4 0 -8"/><path d="M94 80 q-3 -4 0 -8"/></g>
-    </g></g>
-
-    <g class="x x-hat"><g transform="rotate(-12 60 34)">
-      <path d="M47 36 L73 36 L60 8Z" fill="#ff8fb7"/><path d="M52 29 L68 29 M55.5 21.5 L64.5 21.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-      <circle cx="60" cy="7" r="4" fill="#ffd54a"/></g></g>
+    <g class="ft fl"><rect x="45" y="105" width="4" height="8" fill="#ff6a00"/><rect x="40" y="112" width="14" height="3.6" rx="1.8" fill="#ff6a00"/></g>
+    <g class="ft fr"><rect x="71" y="105" width="4" height="8" fill="#ff6a00"/><rect x="66" y="112" width="14" height="3.6" rx="1.8" fill="#ff6a00"/></g>
+    <g class="wing wl"><path d="M27 62 Q5 74 8 100 Q16 109 28 100 Q37 82 33 64Z"/><path d="M16 80 Q14 92 18 98" stroke="#0d3566" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+    <g class="wing wr"><path d="M93 62 Q115 74 112 100 Q104 109 92 100 Q83 82 87 64Z"/><path d="M104 80 Q106 92 102 98" stroke="#0d3566" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+    <ellipse class="body" cx="60" cy="72" rx="36" ry="36"/>
+    <path class="vest" d="M32 88 Q60 81 88 88 L90 103 Q60 113 30 103Z"/>
+    <path d="M31.5 93 Q60 98 88.5 93 L89 97 Q60 102.5 31 97Z M31 101.5 Q60 106.5 89 101.5 L88.8 104.5 Q60 110 31.2 104.5Z" fill="#fff0e3"/>
+    <ellipse cx="60" cy="84" rx="23" ry="6.5" fill="#2b5fa5"/><path d="M50 85 L70 85 L60 101Z" fill="#dbe7f6"/>
+    <g class="helm"><path class="hat" d="M32 41 C32 15 47 6 60 6 C73 6 88 15 88 41Z"/><path d="M35 40 C35 22 42 13 51 9 C45 16 43 28 45 40Z" fill="#fff" opacity=".18"/><path d="M56 6.3 H64 V41 H56Z" fill="#fff0e3"/><rect x="23" y="39" width="74" height="10" rx="5" fill="#c44a00"/></g>
+    <ellipse class="ck" cx="33" cy="69" rx="6.5" ry="4.2"/><ellipse class="ck" cx="87" cy="69" rx="6.5" ry="4.2"/>
+    <ellipse class="oj" cx="46" cy="70.5" rx="9" ry="2.6"/><ellipse class="oj" cx="74" cy="70.5" rx="9" ry="2.6"/>
+    <g class="eyes eyes-sleepy"><circle cx="46" cy="60" r="8.5" fill="#fff"/><circle cx="74" cy="60" r="8.5" fill="#fff"/><circle cx="46.5" cy="63.5" r="4.3" fill="#0b1220"/><circle cx="74.5" cy="63.5" r="4.3" fill="#0b1220"/><path class="lid" d="M36.8 60.2 A9.2 9.2 0 0 1 55.2 60.2Z"/><path class="lid" d="M64.8 60.2 A9.2 9.2 0 0 1 83.2 60.2Z"/><path d="M37 60.2H55M65 60.2H83" stroke="#06101f" stroke-width="1.6" stroke-linecap="round"/></g>
+    <g class="eyes eyes-open"><g><circle cx="46" cy="60" r="8.5" fill="#fff"/><circle cx="47" cy="60.5" r="4.8" fill="#0b1220"/><circle cx="48.6" cy="58.4" r="1.7" fill="#fff"/></g><g class="wk"><circle cx="74" cy="60" r="8.5" fill="#fff"/><circle cx="75" cy="60.5" r="4.8" fill="#0b1220"/><circle cx="76.6" cy="58.4" r="1.7" fill="#fff"/></g></g>
+    <g class="eyes eyes-spark"><circle cx="46" cy="60" r="9.4" fill="#fff"/><circle cx="74" cy="60" r="9.4" fill="#fff"/><circle cx="46.5" cy="60.5" r="5.8" fill="#0b1220"/><circle cx="74.5" cy="60.5" r="5.8" fill="#0b1220"/><circle cx="44" cy="57.5" r="2.1" fill="#fff"/><circle cx="72" cy="57.5" r="2.1" fill="#fff"/><path class="st" d="M49 64 l1 -2.6 l1 2.6 l2.6 1 l-2.6 1 l-1 2.6 l-1 -2.6 l-2.6 -1z" fill="#fff"/><path class="st" d="M77 64 l1 -2.6 l1 2.6 l2.6 1 l-2.6 1 l-1 2.6 l-1 -2.6 l-2.6 -1z" fill="#fff"/></g>
+    <g class="eyes eyes-happy" fill="none" stroke="#fff0e3" stroke-width="3.4" stroke-linecap="round"><path d="M38 62 Q46 51 54 62"/><path d="M66 62 Q74 51 82 62"/></g>
+    <g class="m m-open"><ellipse cx="60" cy="83" rx="6" ry="5" fill="#5a1a2a"/><ellipse cx="60" cy="85.5" rx="3.4" ry="2" fill="#ff8fa8"/></g>
+    <path class="beak" d="M52 66 L68 66 L60 79Z" fill="#ff7a1a" stroke="#d9480f" stroke-width="2" stroke-linejoin="round"/>
+    <path class="m m-frown" d="M54 91 Q60 85 66 91" stroke="#0d2a52" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path class="m m-smile" d="M52 83 Q60 92 68 83" stroke="#0d2a52" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path class="x x-tear" d="M80 67 q-3.2 5 0 7.4 q3.2 -2.4 0 -7.4z" fill="#8fd3ff"/>
+    <g class="x x-cup"><g class="cup"><rect x="82" y="84" width="17" height="15" rx="3.5" fill="#fff"/><ellipse cx="90.5" cy="84.5" rx="8.5" ry="2.4" fill="#8b5a3c"/><path d="M99 88 q6 0 5 6 q-1 4 -5 4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/><g class="steam" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round"><path d="M87 80 q-3 -4 0 -8"/><path d="M94 80 q-3 -4 0 -8"/></g></g></g>
   </g></g>
-
   <text class="x x-zzz z1" x="88" y="22" font-size="13" font-weight="700" fill="#cfd6ff" font-family="Caveat,sans-serif">z</text>
   <text class="x x-zzz z2" x="94" y="14" font-size="16" font-weight="700" fill="#cfd6ff" font-family="Caveat,sans-serif">z</text>
   <text class="x x-zzz z3" x="100" y="4" font-size="19" font-weight="700" fill="#cfd6ff" font-family="Caveat,sans-serif">Z</text>
   <text class="x x-note n1" x="10" y="26" font-size="17" fill="#ff7bac">♪</text>
   <text class="x x-note n2" x="102" y="30" font-size="17" fill="#8f9bff">♫</text>
-  <text class="x x-heart hh1" x="14" y="40" font-size="12" fill="#ff5c8a">♥</text>
-  <text class="x x-heart hh2" x="100" y="46" font-size="12" fill="#ff7bac">♥</text>
-  <text class="x x-heart hh3" x="58" y="-2" font-size="12" fill="#ff5c8a">♥</text>
-  <rect class="x x-cf" x="8"  y="-14" width="4" height="7" fill="#ff6b9a" style="--dl:0s;--du:1.9s"/>
-  <rect class="x x-cf" x="22" y="-14" width="4" height="7" fill="#ffd54a" style="--dl:.4s;--du:2.3s"/>
-  <rect class="x x-cf" x="36" y="-14" width="4" height="7" fill="#6fd3ff" style="--dl:.9s;--du:2s"/>
-  <rect class="x x-cf" x="50" y="-14" width="4" height="7" fill="#b79cf5" style="--dl:.2s;--du:2.4s"/>
-  <rect class="x x-cf" x="64" y="-14" width="4" height="7" fill="#7be0a8" style="--dl:1.1s;--du:1.8s"/>
-  <rect class="x x-cf" x="78" y="-14" width="4" height="7" fill="#ff6b9a" style="--dl:.6s;--du:2.2s"/>
-  <rect class="x x-cf" x="92" y="-14" width="4" height="7" fill="#ffd54a" style="--dl:1.4s;--du:2.1s"/>
-  <rect class="x x-cf" x="106" y="-14" width="4" height="7" fill="#6fd3ff" style="--dl:.3s;--du:2.5s"/>
-  <rect class="x x-cf" x="15" y="-14" width="4" height="7" fill="#b79cf5" style="--dl:1.6s;--du:2s"/>
-  <rect class="x x-cf" x="85" y="-14" width="4" height="7" fill="#7be0a8" style="--dl:.7s;--du:1.9s"/>
 </svg>
   </div>
 </div>
@@ -3832,10 +3780,13 @@ const MSG=[
  ['Voy despertando con mi café ☕','¡Vamos, que siguen sumando! 📱'],
  ['¡Qué bien! Voy mejorando ✨','Otro más por QR y me pongo a bailar 💃'],
  ['¡Casi, casi! Me encanta el QR 🎶','¡Uno más y fiesta! 🎉'],
- ['¡¡Tope de felicidad!! 🎉💃','¡Gracias a todos por usar el QR! 💖']
+ ['¡Fiesta en el muelle! 🎉💃','¡Gracias a todos por usar el QR! 💖'],
+ ['¡Soy Plumitas, superhéroe del QR! 🦸','¡Vuelo más alto con cada registro! 📱'],
+ ['¡Soy una estrella! 😎 ¡Fuegos artificiales!','¡Qué equipazo! Gracias por el QR 🎆'],
+ ['¡¡LEYENDA DEL MUELLE!! 👑','¡Hoy lo habéis bordado, equipo! 🏆']
 ];
-const C0={b:[141,147,163],l:[170,176,189],w:[115,122,140],be:[201,205,214]};
-const C1={b:[168,186,226],l:[218,228,248],w:[136,158,204],be:[244,247,253]};
+const C0={b:[58,70,98],l:[198,120,70],w:[82,98,130],be:[184,108,60]};
+const C1={b:[13,42,82],l:[255,106,0],w:[21,74,133],be:[255,106,0]};
 const mix=(a,b,t)=>'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')+')';
 const dkey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 const hoy0=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
@@ -3845,7 +3796,7 @@ const save=()=>{try{localStorage.setItem('pg_day',JSON.stringify({d:day,k:[...ke
 let last=null,lastLv=0,mi=0,ov=0,ovT=0,born=Date.now();
 
 /* corazones: cada registro = medio corazón */
-$('pg').querySelector('.pg-hearts').innerHTML=[0,1,2,3,4].map(()=>'<span class="h"><i style="width:0">♥</i>♥</span>').join('');
+$('pg').querySelector('.pg-hearts').innerHTML=[0,1,2,3,4,5,6,7].map(()=>'<span class="h"><i style="width:0">♥</i>♥</span>').join('');
 const hs=[...pg.querySelectorAll('.pg-hearts .h i')];
 
 /* Fuentes de registros QR de hoy (se suman, así si una falla las otras cuentan igual):
@@ -3880,12 +3831,12 @@ function msg(){
   if(el.textContent!==t){el.textContent=t;el.classList.remove('sw');void el.offsetWidth;el.classList.add('sw')}
 }
 function render(n){
-  const pts=Math.min(5,n*0.5),lv=Math.min(5,Math.floor(pts)),t=Math.min(1,pts/5);
+  const pts=Math.min(8,n*0.5),lv=Math.min(8,Math.floor(pts)),t=Math.min(1,pts/5);
   pg.style.setProperty('--pgb',mix(C0.b,C1.b,t));pg.style.setProperty('--pgl',mix(C0.l,C1.l,t));
   pg.style.setProperty('--pgw',mix(C0.w,C1.w,t));pg.style.setProperty('--pgbe',mix(C0.be,C1.be,t));
   hs.forEach((h,i)=>{h.style.width=Math.max(0,Math.min(1,pts-i))*100+'%'});
   if(+pg.dataset.lv!==lv){pg.dataset.lv=lv;mi=0}
-  pg.setAttribute('aria-label','Coo, la paloma del registro por QR: nivel '+lv+' de 5, '+n+' registros hoy');
+  pg.setAttribute('aria-label','Plumitas, la paloma del muelle: nivel '+lv+' de 8, '+n+' registros hoy');
   const sube=last!==null&&n>last&&Date.now()-born>8000,nivel=lv>lastLv;
   last=n;lastLv=lv;
   try{msg()}catch(e){console.warn('Coo msg',e)}
@@ -3931,18 +3882,18 @@ setTimeout(()=>{try{tick()}catch(_){}},400);
 #pg .rd,#pg .x-cf,#pg .x-heart{display:none!important}
 #pg .pg-aura{position:absolute;left:50%;top:52%;width:250px;height:250px;margin:-125px 0 0 -125px;border-radius:50%;pointer-events:none;z-index:-1;background:var(--pga,none)}
 #pg .pg-aura::before{content:'';position:absolute;inset:0;border-radius:50%;display:none;background:repeating-conic-gradient(rgba(255,255,255,.34) 0 7deg,transparent 7deg 22deg);-webkit-mask:radial-gradient(circle,#000 12%,transparent 66%);mask:radial-gradient(circle,#000 12%,transparent 66%);animation:pgSpinA 9s linear infinite}
-#pg[data-lv="4"] .pg-aura::before,#pg[data-lv="5"] .pg-aura::before{display:block}
+#pg[data-lv="4"] .pg-aura::before,#pg.ge5 .pg-aura::before{display:block}
 #pg[data-lv="0"]{--pga:radial-gradient(circle,rgba(10,16,40,.72),transparent 66%)}
 #pg[data-lv="1"]{--pga:radial-gradient(circle,rgba(130,150,230,.3),transparent 66%)}
 #pg[data-lv="2"]{--pga:radial-gradient(circle,rgba(255,196,90,.42),transparent 66%)}
 #pg[data-lv="3"]{--pga:radial-gradient(circle,rgba(255,140,190,.38),transparent 66%)}
 #pg[data-lv="4"]{--pga:radial-gradient(circle,rgba(185,120,255,.5),transparent 66%)}
-#pg[data-lv="5"]{--pga:radial-gradient(circle,rgba(255,120,200,.45),rgba(110,190,255,.3) 45%,transparent 68%)}
-#pg[data-lv="0"] .pg-aura{animation:pgFlash 7s infinite}#pg[data-lv="5"] .pg-aura{animation:pgHue 5s linear infinite}
+#pg.ge5{--pga:radial-gradient(circle,rgba(255,120,200,.45),rgba(110,190,255,.3) 45%,transparent 68%)}
+#pg[data-lv="0"] .pg-aura{animation:pgFlash 7s infinite}#pg.ge5 .pg-aura{animation:pgHue 5s linear infinite}
 #pg .face{transform:translate(calc(var(--fx,0)*1px),calc(var(--fy,0)*1px));transition:transform .25s}
-#pg[data-lv="3"] .hb{animation:pgHB 1.1s ease-in-out infinite}#pg[data-lv="4"] .hb,#pg[data-lv="5"] .hb{animation:pgHB .55s ease-in-out infinite}
-#pg[data-lv="5"] .pg-mv{transform-origin:60px 112px;animation:pgRoutine 10s ease-in-out infinite}
-#pg[data-lv="0"] .x-bolt,#pg[data-lv="0"] .x-rip,#pg[data-lv="1"] .x-alarm,#pg[data-lv="3"] .x-hp,#pg[data-lv="4"] .x-mic,#pg[data-lv="5"] .x-disco{display:inline}
+#pg[data-lv="3"] .hb{animation:pgHB 1.1s ease-in-out infinite}#pg[data-lv="4"] .hb,#pg.ge5 .hb{animation:pgHB .55s ease-in-out infinite}
+#pg.ge5 .pg-mv{transform-origin:60px 112px;animation:pgRoutine 10s ease-in-out infinite}
+#pg[data-lv="0"] .x-bolt,#pg[data-lv="0"] .x-rip,#pg[data-lv="1"] .x-alarm,#pg[data-lv="3"] .x-hp,#pg[data-lv="4"] .x-mic,#pg.ge5 .x-disco{display:inline}
 #pg .x-bolt{animation:pgBolt 7s infinite}
 #pg .rp{transform-box:fill-box;transform-origin:center;animation:pgRip 2.4s ease-out infinite}#pg .rp:nth-child(2){animation-delay:.8s}#pg .rp:nth-child(3){animation-delay:1.6s}
 #pg .x-alarm{transform-origin:-4px 106px;animation:pgAlarm 5s infinite}
@@ -3983,15 +3934,15 @@ const face=document.createElementNS(NS,'g'),hb=document.createElementNS(NS,'g');
 const cup=bird.querySelector('.x-cup');bird.insertBefore(face,cup);
 ['.ck','.oj','.eyes','.x-brow','.m-open','.beak','.m-frown','.m-smile','.x-tear'].forEach(s=>bird.querySelectorAll(s).forEach(n=>hb.appendChild(n)));
 /* brillo y volumen */
-inj(bird,face,'<ellipse cx="60" cy="68" rx="40" ry="38" fill="url(#pgSh)"/><ellipse cx="41" cy="43" rx="13" ry="6.5" fill="#fff" opacity=".38" transform="rotate(-28 41 43)"/>');
+inj(bird,face,'<ellipse cx="60" cy="72" rx="36" ry="36" fill="url(#pgSh)"/>');
 inj(svg.querySelector('defs'),null,'<linearGradient id="pgSh" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#1c2550" stop-opacity="0"/><stop offset="1" stop-color="#1c2550" stop-opacity=".26"/></linearGradient>');
-inj(hb,null,'<g class="eyes eyes-dz" fill="none" stroke="#2a2433" stroke-width="2.2"><circle class="sp" cx="44" cy="62" r="6.5" stroke-dasharray="16 7"/><circle class="sp" cx="76" cy="62" r="6.5" stroke-dasharray="16 7"/><circle class="sp" cx="44" cy="62" r="3"/><circle class="sp" cx="76" cy="62" r="3"/></g><ellipse cx="60" cy="66" rx="3" ry="1.6" fill="#fff" opacity=".9"/>');
+inj(hb,null,'<g class="eyes eyes-dz" fill="none" stroke="#0b1220" stroke-width="2"><circle cx="46" cy="60" r="8.5" fill="#fff" stroke="none"/><circle cx="74" cy="60" r="8.5" fill="#fff" stroke="none"/><circle class="sp" cx="46" cy="60" r="6" stroke-dasharray="14 7"/><circle class="sp" cx="74" cy="60" r="6" stroke-dasharray="14 7"/><circle class="sp" cx="46" cy="60" r="2.6"/><circle class="sp" cx="74" cy="60" r="2.6"/></g>');
 /* atrezzo por nivel */
 inj(svg,hw,'<g class="x x-rip"><ellipse class="rp" cx="60" cy="119" rx="16" ry="3" fill="none" stroke="#a8d8ff" stroke-width="1.4"/><ellipse class="rp" cx="60" cy="119" rx="16" ry="3" fill="none" stroke="#a8d8ff" stroke-width="1.4"/><ellipse class="rp" cx="60" cy="119" rx="16" ry="3" fill="none" stroke="#a8d8ff" stroke-width="1.4"/></g>'
  +'<g class="x x-alarm"><circle cx="-10" cy="97" r="3" fill="#c44"/><circle cx="2" cy="97" r="3" fill="#c44"/><circle cx="-4" cy="107" r="9.5" fill="#ff8a8a" stroke="#c44" stroke-width="2"/><circle cx="-4" cy="107" r="6.5" fill="#fff"/><path d="M-4 107V102M-4 107H0" stroke="#444" stroke-width="1.5" stroke-linecap="round"/><path d="M-18 100q-3 7 0 14M10 100q3 7 0 14" stroke="#ffd54a" fill="none" stroke-width="1.8" stroke-linecap="round"/></g>'
  +'<path class="x x-bolt" d="M74 -6 L63 9 H70 L60 24 L80 5 H72Z" fill="#fff6a8"/>'
  +'<g class="x x-disco"><path d="M60 -44V-31" stroke="#aab" stroke-width="1.5"/><circle cx="60" cy="-23" r="9.5" fill="#d7def5" stroke="#9aa6d0"/><ellipse cx="60" cy="-23" rx="9.5" ry="3.2" fill="none" stroke="#9aa6d0"/><ellipse cx="60" cy="-23" rx="3.4" ry="9.5" fill="none" stroke="#9aa6d0"/><circle class="gl" cx="56" cy="-27" r="1.8" fill="#fff"/><circle class="gl" cx="64" cy="-19" r="1.8" fill="#fff"/></g>');
-inj(bird,cup,'<g class="x x-hp"><path d="M22 60Q60 0 98 60" stroke="#ff7bac" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="14" y="52" width="13" height="21" rx="6" fill="#ff5c8a"/><rect x="93" y="52" width="13" height="21" rx="6" fill="#ff5c8a"/></g><g class="x x-mic"><path d="M93 102L79 85" stroke="#3b3b4a" stroke-width="3.6" stroke-linecap="round"/><circle cx="76" cy="81" r="6" fill="#dfe3f0" stroke="#555"/></g>');
+inj(bird,cup,'<g class="x x-hp"><path d="M20 58Q60 -52 100 58" stroke="#ff7bac" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="14" y="52" width="13" height="21" rx="6" fill="#ff5c8a"/><rect x="93" y="52" width="13" height="21" rx="6" fill="#ff5c8a"/></g><g class="x x-mic"><path d="M93 102L79 85" stroke="#3b3b4a" stroke-width="3.6" stroke-linecap="round"/><circle cx="76" cy="81" r="6" fill="#dfe3f0" stroke="#555"/></g>');
 inj(svg,null,'<g class="x-orb"><text x="36" y="32" font-size="13" fill="#ffd54a">★</text><text x="80" y="30" font-size="11" fill="#8fd3ff">✦</text><text x="58" y="12" font-size="13" fill="#ff7bac">★</text></g>');
 
 /* ── motor de partículas ── */
@@ -4023,7 +3974,7 @@ setInterval(()=>{if(document.hidden)return;fr++;const lv=+pg.dataset.lv,p=pt();
  if(lv===2&&fr%9===0)add({x:p.x+rand(-44,44),y:p.fy-rand(0,70),vy:-.4,m:60,z:2.2,c:'#ffe08a'});
  if(lv===3&&fr%16===0)notes(1);
  if(lv===4&&fr%10===0){notes(1);add({x:p.x+rand(-46,46),y:p.y+rand(-50,40),m:34,z:3,c:'#ffb3e6'})}
- if(lv===5){if(fr%66===0)cannons();if(fr%14===0)hearts(1);if(fr%4===0)add({x:p.x+rand(-50,50),y:p.y+rand(-55,45),m:30,z:3,c:pick(COL)})}
+ if(lv>=5){if(lv>=7&&fr%40===0)firework();if(fr%66===0)cannons();if(fr%14===0)hearts(1);if(fr%4===0)add({x:p.x+rand(-50,50),y:p.y+rand(-55,45),m:30,z:3,c:pick(COL)})}
  if(P.length||lv<2)draw()},33);
 
 /* ── interacción ── */
@@ -4033,25 +3984,104 @@ window.addEventListener('pointermove',e=>{const r=box.getBoundingClientRect(),dx
  clearTimeout(idle);idle=setTimeout(()=>{pg.style.setProperty('--fx',0);pg.style.setProperty('--fy',0)},4000)},{passive:true});
 let sayT=0;function say(t,ms){ov.textContent=t;bub.classList.add('ovr');clearTimeout(sayT);sayT=setTimeout(()=>bub.classList.remove('ovr'),ms)}
 function hwA(c,ms){hw.classList.remove('hop','shake','spin');void hw.getBBox();hw.classList.add(c);setTimeout(()=>hw.classList.remove(c),ms)}
-const POKE=[['¡Ay! Déjame dormir… 😴','Snif… ¿qué quieres? 😢'],['¡Cinco minutitos más! 🥱'],['¡Mi café! ☕','¡Que se derrama! ☕'],['¡Hihi, cosquillas! 😆'],['♪ ¡Coo coo! ♪'],['¡¡Fiesta!! 🎉','¡Reina del baile! 💃']];
+const POKE=[['¡Ay! Déjame dormir… 😴','Snif… ¿qué quieres? 😢'],['¡Cinco minutitos más! 🥱'],['¡Mi café! ☕','¡Que se derrama! ☕'],['¡Hihi, cosquillas! 😆'],['♪ ¡Coo coo! ♪'],['¡¡Fiesta!! 🎉','¡Reina del baile! 💃'],['¡Al rescate! 🦸','¡Whoosh! 💨'],['😎 ¡Bien, bien!','¡Foto, foto! 📸'],['¡Reverencia! 👑','¡Silencio, que reina la leyenda! 🏆']];
 let pokes=0,pokeT=0,holdT=0,petI=0;
-function dizzy(){pg.classList.add('dz');say('Me mareo… 😵‍💫',2600);hwA('shake',900);setTimeout(()=>pg.classList.remove('dz'),2600)}
+function dizzy(){pg.classList.add('dz');sfx('dz');say('Me mareo… 😵‍💫',2600);hwA('shake',900);setTimeout(()=>pg.classList.remove('dz'),2600)}
 function poke(){const lv=+pg.dataset.lv;pokes++;clearTimeout(pokeT);pokeT=setTimeout(()=>pokes=0,1800);
  if(pokes>=6){pokes=0;dizzy();return}
- say(pick(POKE[lv]),2200);hwA(lv<=2?'shake':(lv===3||lv===5)?'spin':'hop',lv===3||lv===5?1300:lv<=2?600:700);
- if(lv===5)confetti(28);else if(lv>=3)notes(5);else if(lv===0)splash(pt().x,pt().fy)}
-const startPet=()=>{pg.classList.add('pt');say('Mmm… qué rico 💖',99999);hearts(3);petI=setInterval(()=>hearts(2),380)};
+ say(pick(POKE[lv]),2200);sfx('poke',lv);hwA(lv<=2?'shake':(lv===3||lv>=5)?'spin':'hop',lv===3||lv>=5?1300:lv<=2?600:700);
+ if(lv>=5)confetti(28);else if(lv>=3)notes(5);else if(lv===0)splash(pt().x,pt().fy)}
+const startPet=()=>{pg.classList.add('pt');say('Mmm… qué rico 💖',99999);hearts(3);petI=setInterval(()=>{hearts(2);sfx('pur')},380)};
 const stopPet=()=>{clearTimeout(holdT);if(!pg.classList.contains('pt'))return;pg.classList.remove('pt');clearInterval(petI);say('¡Gracias! 🥰',1800)};
 box.addEventListener('pointerdown',e=>{e.preventDefault();poke();holdT=setTimeout(startPet,550)});
 ['pointerup','pointerleave','pointercancel'].forEach(v=>box.addEventListener(v,stopPet));
 bub.addEventListener('click',()=>{let n=0;try{n=window.__pgCount?window.__pgCount():JSON.parse(localStorage.getItem('pg_day')).k.length}catch(_){}
- const lv=+pg.dataset.lv,f=(lv+1)*2-n;say('Hoy: '+n+' por QR · nivel '+lv+'/5 · '+(lv<5?'faltan '+f+' para el nivel '+(lv+1):'¡máximo! 🎉'),8000)});
+ const lv=+pg.dataset.lv,f=(lv+1)*2-n;say('Hoy: '+n+' por QR · nivel '+lv+'/8 · '+(lv<8?'faltan '+f+' para el nivel '+(lv+1):'¡máximo! 🏆'),8000)});
 /* evolución al subir de nivel + corazones por cada registro */
 const born=Date.now();let l0=+pg.dataset.lv;
 new MutationObserver(ms=>{ms.forEach(r=>{
- if(r.type==='attributes'){const lv=+pg.dataset.lv;if(Date.now()-born>8000&&lv>l0){ring();confetti(34);const b=document.createElement('div');b.className='pg-bn';b.textContent=lv===5?'¡¡MÁXIMO!!':'¡NIVEL '+lv+'!';box.appendChild(b);setTimeout(()=>b.remove(),2300);if(lv===5)cannons()}l0=lv}
- else r.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('pg-fl')&&/½/.test(n.textContent))hearts(6)})})})
+ if(r.type==='attributes'){const lv=+pg.dataset.lv;if(Date.now()-born>8000&&lv>l0){ring();sfx(lv===8?'max':'up');confetti(34);const b=document.createElement('div');b.className='pg-bn';b.textContent=lv===8?'¡¡LEYENDA!!':(lv>=5?['','','','','','¡FIESTA!','¡SUPERHÉROE!','¡ESTRELLA!'][lv]:'¡NIVEL '+lv+'!');box.appendChild(b);setTimeout(()=>b.remove(),2300);if(lv>=5)cannons()}l0=lv}
+ else r.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('pg-fl')&&/½/.test(n.textContent)){hearts(6);sfx('reg');surp()}})})})
  .observe(pg,{attributes:true,attributeFilter:['data-lv'],childList:true,subtree:true});
+
+const MAXL=8;
+/* ── niveles 6-8: capa, gafas, corona, móvil, fuegos artificiales ── */
+const setGe=()=>{const l=+pg.dataset.lv;[5,6,7,8].forEach(k=>pg.classList.toggle('ge'+k,l>=k))};setGe();
+new MutationObserver(setGe).observe(pg,{attributes:true,attributeFilter:['data-lv']});
+inj(bird,bird.firstChild,'<g class="x x-cape"><path d="M33 60 Q12 94 18 118 H102 Q108 94 87 60Z" fill="#e63946"/><path d="M60 64 Q55 92 60 118" stroke="#b02130" stroke-width="2" fill="none"/></g>');
+inj(bird,cup,'<g class="x x-crown"><path d="M42 8 L46 -6 L53 2 L60 -10 L67 2 L74 -6 L78 8Z" fill="#ffd54a" stroke="#c99700" stroke-width="1.4" stroke-linejoin="round"/><circle cx="60" cy="-7" r="1.8" fill="#ff5c8a"/><circle cx="46" cy="-3" r="1.5" fill="#6fd3ff"/><circle cx="74" cy="-3" r="1.5" fill="#6fd3ff"/></g><g class="x x-ph"><circle cx="100" cy="14" r="9" fill="#2fbf5c" stroke="#fff" stroke-width="1.6"/><text x="95" y="18.5" font-size="11">📱</text></g>');
+inj(hb,null,'<g class="x x-shades"><rect x="35" y="52" width="22" height="15" rx="5" fill="#0b1220"/><rect x="63" y="52" width="22" height="15" rx="5" fill="#0b1220"/><path d="M57 58H63" stroke="#0b1220" stroke-width="2.5"/><path d="M39 56h6M67 56h6" stroke="#fff" opacity=".55" stroke-width="2" stroke-linecap="round"/></g>');
+const firework=()=>{const p=pt(),x=p.x+rand(-70,50),y=p.y-rand(60,110),c=pick(COL);for(let i=0;i<30;i++){const a=i/30*6.28,v=rand(1.5,3.4);add({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,gv:.04,dr:.965,m:54,z:2.4,c})}};
+const surp=()=>{pg.classList.add('su');setTimeout(()=>pg.classList.remove('su'),1200)};
+/* ── sonidos (WebAudio, sin archivos; apagados por defecto) ── */
+let AC=null,snd=false;try{snd=localStorage.getItem('pg_snd')==='1'}catch(_){}
+function tone(f,t0,d,ty,v,f2){if(!snd)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!AC)AC=new C();if(AC.state==='suspended')AC.resume();
+ const o=AC.createOscillator(),gn=AC.createGain(),t=AC.currentTime+t0;o.type=ty||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(v||.12,t+.02);gn.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(gn);gn.connect(AC.destination);o.start(t);o.stop(t+d+.05)}
+const arp=(a,ty,step,d,v)=>a.forEach((f,i)=>tone(f,i*step,d,ty,v));
+const coo=()=>{tone(300,0,.22,'sine',.14,230);tone(340,.2,.3,'sine',.14,250)};
+const chirp=()=>{tone(900,0,.08,'triangle',.1,1500);tone(1300,.1,.09,'triangle',.1,1800)};
+function sfx(k,lv){
+ if(k==='poke'){if(lv===0)tone(420,0,.3,'sine',.12,280);else if(lv===1)tone(260,0,.6,'sine',.12,170);else if(lv===2){tone(300,0,.1,'sine',.12,200);tone(300,.14,.1,'sine',.12,200)}else if(lv===3)coo();else chirp()}
+ else if(k==='dz'){for(let i=0;i<4;i++)tone(640,i*.18,.17,'sine',.1,320)}
+ else if(k==='reg'){tone(784,0,.12,'triangle',.12);tone(1175,.1,.22,'triangle',.12)}
+ else if(k==='up')arp([523,659,784,1046],'triangle',.1,.2,.13);
+ else if(k==='max'){arp([523,659,784,1046,784,1046,1318,1568],'square',.11,.2,.06);chirp()}
+ else if(k==='pur')tone(110,0,.34,'sawtooth',.05,95);
+ else if(k==='five'){arp([659,784,988,1319],'triangle',.09,.2,.13);chirp()}
+ else if(k==='four'){tone(880,0,.12,'triangle',.12);tone(1100,.12,.2,'triangle',.12)}
+ else if(k==='hm')tone(350,0,.22,'sine',.1,310);
+ else if(k==='sad'){tone(420,0,.3,'sine',.12,280);tone(330,.3,.5,'sine',.12,190)}}
+const sb=document.createElement('button');sb.className='pg-snd';sb.title='Sonidos de Plumitas';box.appendChild(sb);
+const sbR=()=>{sb.textContent=snd?'🔊':'🔇'};sbR();
+sb.addEventListener('pointerdown',e=>e.stopPropagation());
+sb.addEventListener('click',e=>{e.stopPropagation();snd=!snd;try{localStorage.setItem('pg_snd',snd?'1':'0')}catch(_){}sbR();if(snd)coo()});
+/* ── reacción a las valoraciones de los chóferes ── */
+function rate(r,c){
+ r=Math.max(1,Math.min(5,r|0));const st='⭐'.repeat(r),b=document.createElement('div');
+ b.className='pg-bn'+(r<=2?' bad':'');b.textContent='★'.repeat(r)+'☆'.repeat(5-r);box.appendChild(b);setTimeout(()=>b.remove(),2300);
+ if(r>=4){pg.classList.add('hp');setTimeout(()=>pg.classList.remove('hp'),5000);hearts(r===5?10:5);
+  if(r===5){confetti(36);ring();hwA('spin',1300)}else hwA('hop',700);
+  say((r===5?'¡Un chófer feliz! ':'¡Buena valoración! ')+st,5000);sfx(r===5?'five':'four')}
+ else if(r===3){say('Un 3… podemos mejorar 🤔',5000);hwA('shake',600);sfx('hm')}
+ else{pg.classList.add('sd');setTimeout(()=>pg.classList.remove('sd'),6000);hwA('shake',800);
+  say(st+(c?' «'+c.slice(0,60)+'»':' ¿Qué ha pasado? 😟'),8000);sfx('sad');
+  const p=pt();for(let i=0;i<10;i++)add({t:'d',x:p.x+rand(-26,26),y:p.y-p.s*52,vy:4.6,m:80,gy:p.fy+1,c:'#8fd3ff'})}}
+const seenF=new Set();try{feedbacks.forEach(f=>seenF.add(f.k||f.id))}catch(_){}
+setInterval(()=>{let L;try{L=feedbacks}catch(_){return}if(!Array.isArray(L))return;
+ L.forEach(f=>{const k=f.k||f.id;if(seenF.has(k))return;seenF.add(k);if(!f.del&&Date.now()-(+f.t||0)<120000)rate(+f.r,String(f.c||''))})},2000);
+window.pgRate=rate;
 })();
 </script>
+<style>
+/* Plumitas: paloma del manual */
+#pg .ck{fill:#6b4a48!important;opacity:.9!important}
+#pg.ge5 .ck,#pg.hp .ck,#pg.pt .ck,#pg[data-lv="3"] .ck,#pg[data-lv="4"] .ck{fill:#d0645a!important;opacity:1!important}
+#pg .oj{fill:#6a5aa8}#pg .x-hat{display:none!important}
+#pg .wk{transform-box:fill-box;transform-origin:center;animation:pgWink 7s infinite}
+@keyframes pgWink{0%,88%,100%{transform:scaleY(1)}91%,95%{transform:scaleY(.08)}}
+/* niveles 6 a 8 */
+#pg.ge6{--pga:radial-gradient(circle,rgba(230,57,70,.4),rgba(255,160,80,.25) 50%,transparent 68%)}
+#pg.ge7{--pga:radial-gradient(circle,rgba(255,215,90,.5),rgba(255,120,200,.3) 50%,transparent 68%)}
+#pg.ge8{--pga:radial-gradient(circle,rgba(255,213,74,.65),rgba(255,160,40,.35) 52%,transparent 70%)}
+#pg.ge8 .pg-aura{animation:none}#pg.ge8 .pg-aura::before{background:repeating-conic-gradient(rgba(255,230,120,.5) 0 7deg,transparent 7deg 22deg)}
+#pg.ge6 .x-cape,#pg.ge7 .x-shades,#pg.ge8 .x-crown,#pg.su .x-ph{display:inline}
+#pg[data-lv="6"] .pg-bird{animation:pgFly 2.2s ease-in-out infinite}
+#pg[data-lv="6"] .pg-sh{transform-box:fill-box;transform-origin:center;animation:pgShSh 2.2s ease-in-out infinite}
+#pg .x-cape{transform-origin:60px 62px;animation:pgCape 1.1s ease-in-out infinite}
+#pg.ge8 .vest{fill:#ffc400}
+#pg.ge8 .x-crown{transform-origin:60px 8px;animation:pgHat .8s ease-in-out infinite}
+#pg .x-ph{transform-box:fill-box;transform-origin:center;animation:pgPop .5s ease-out}
+#pg.su .eyes{display:none!important}#pg.su .eyes-open{display:inline!important}
+@keyframes pgFly{0%,100%{transform:translateY(-8px) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
+@keyframes pgShSh{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(.7);opacity:.5}}
+@keyframes pgCape{0%,100%{transform:skewX(-4deg) scaleY(1)}50%{transform:skewX(5deg) scaleY(1.05)}}
+@keyframes pgPop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+/* valoraciones y sonido */
+#pg.hp .eyes:not(.eyes-happy){display:none!important}#pg.hp .eyes-happy{display:inline!important}
+#pg.sd .eyes:not(.eyes-sleepy){display:none!important}#pg.sd .eyes-sleepy{display:inline!important}#pg.sd .x-tear,#pg.sd .m-frown{display:inline!important}#pg.sd .m-smile,#pg.sd .m-open{display:none!important}
+#pg .pg-bn.bad{background:linear-gradient(90deg,#9fb3dd,#6a7aa8)}
+#pg .pg-snd{position:absolute;left:-4px;bottom:2px;width:22px;height:22px;padding:0;border:0;border-radius:50%;background:rgba(10,20,40,.78);color:#fff;font-size:12px;line-height:22px;text-align:center;cursor:pointer;pointer-events:auto;box-shadow:0 1px 4px rgba(0,0,0,.5);opacity:.75}
+#pg .pg-snd:hover{opacity:1}
+</style>
 </body></html>

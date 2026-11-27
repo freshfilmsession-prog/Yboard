@@ -992,7 +992,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <div class="modal-title-w"><div class="modal-icon">📊</div><div class="modal-title"><em>Métricas</em> de operación</div></div>
             <button class="btn-close" onclick="closeModal('modal-metricas')">✕</button>
         </div>
-        <div class="filter-panel"><div class="form-group"><label class="form-label">Periodo</label><select id="m-per" class="form-select" onchange="renderMetricas()"><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Último año</option><option value="0">Todo el histórico</option></select></div></div>
+        <div class="filter-panel"><div class="form-group"><label class="form-label">Periodo</label><select id="m-per" class="form-select" onchange="renderMetricas()"><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Último año</option><option value="0">Todo el histórico</option></select></div>
+            <div class="form-group"><label class="form-label">Desde</label><input type="date" id="m-d1" class="form-input" onchange="renderMetricas()"></div>
+            <div class="form-group"><label class="form-label">Hasta</label><input type="date" id="m-d2" class="form-input" onchange="renderMetricas()"></div>
+            <div class="form-group" style="justify-content:flex-end"><button class="nav-btn" style="height:42px" onclick="resetMetricas()">✕ Limpiar fechas</button></div></div>
         <div class="stats-row" id="m-kpis"></div>
         <div id="m-body"></div>
     </div>
@@ -2010,9 +2013,14 @@ setInterval(chequearAlertas, 60000);
 
 // Métricas
 function abrirMetricas() { openModal('modal-metricas'); renderMetricas(); }
+function resetMetricas() { document.getElementById('m-d1').value = ''; document.getElementById('m-d2').value = ''; renderMetricas(); }
 function renderMetricas() {
     const per = +document.getElementById('m-per').value, lim = new Date(); lim.setDate(lim.getDate() - per);
-    const data = historico.filter(h => !per || (h.fecha || '') >= isoLocal(lim));
+    const d1 = document.getElementById('m-d1').value, d2 = document.getElementById('m-d2').value;
+    const rango = !!(d1 || d2);
+    if (rango && d1 && d2 && d1 > d2) { document.getElementById('m-kpis').innerHTML = ''; document.getElementById('m-body').innerHTML = '<div class="hab-empty">⚠ La fecha "Desde" no puede ser posterior a "Hasta".</div>'; return; }
+    document.getElementById('m-per').disabled = rango;
+    const data = historico.filter(h => { const f = h.fecha || ''; return rango ? (!d1 || f >= d1) && (!d2 || f <= d2) : (!per || f >= isoLocal(lim)); });
     const dif = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 60000 : null;
     const fm = v => v == null ? '—' : Math.round(v) + ' min';
     const avg = a => { a = a.filter(x => x != null && x >= 0 && x <= _OK); return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; };

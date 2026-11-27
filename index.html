@@ -388,6 +388,7 @@
         /* Reporte */
         .stats-row  { display: flex; gap: 10px; margin-bottom: 14px; }
         .stat-card  { flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; }
+        #m-kpis .stat-card { min-width: 150px; }
         .stat-card.orange { border-left: 3px solid var(--orange); }
         .stat-card.green  { border-left: 3px solid var(--green);  }
         .stat-card.blue   { border-left: 3px solid var(--blue);   }
@@ -996,7 +997,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             <div class="form-group"><label class="form-label">Desde</label><input type="date" id="m-d1" class="form-input" onchange="renderMetricas()"></div>
             <div class="form-group"><label class="form-label">Hasta</label><input type="date" id="m-d2" class="form-input" onchange="renderMetricas()"></div>
             <div class="form-group" style="justify-content:flex-end"><button class="nav-btn" style="height:42px" onclick="resetMetricas()">✕ Limpiar fechas</button></div></div>
-        <div class="stats-row" id="m-kpis"></div>
+        <div class="stats-row" id="m-kpis" style="flex-wrap:wrap"></div>
         <div id="m-body"></div>
     </div>
 </div>
@@ -2027,7 +2028,10 @@ function renderMetricas() {
     const punt = h => { const p = previsiones.find(x => x.id === h.previsionId); if (!p || !h.t_llegada) return null; const d = dif(new Date(p.fecha + 'T' + p.hora), h.t_llegada); return d == null ? null : d <= 15; };
     const rows = a => ({ n: a.length, esp: avg(a.map(h => dif(h.t_llegada, h.t_inicio))), op: avg(a.map(h => dif(h.t_inicio, h.t_fin))), pt: (() => { const v = a.map(punt).filter(x => x != null); return v.length ? Math.round(100 * v.filter(Boolean).length / v.length) + '%' : '—'; })() });
     const g = rows(data);
-    document.getElementById('m-kpis').innerHTML = [['orange', g.n, 'Camiones'], ['blue', fm(g.esp), 'Espera media'], ['green', fm(g.op), 'Operación media'], ['orange', g.pt, 'Puntualidad (±15 min)']]
+    const sum = a => { a = a.filter(x => x != null && x >= 0 && x <= _OK); return a.length ? a.reduce((s, x) => s + x, 0) : null; };
+    const ft = v => v == null ? '—' : fmtMin(Math.round(v));
+    const tEsp = sum(data.map(h => dif(h.t_llegada, h.t_inicio))), tOp = sum(data.map(h => dif(h.t_inicio, h.t_fin))), tTot = sum(data.map(h => dif(h.t_llegada, h.t_fin)));
+    document.getElementById('m-kpis').innerHTML = [['orange', g.n, 'Camiones'], ['blue', fm(g.esp), 'Espera media'], ['green', fm(g.op), 'Operación media'], ['orange', g.pt, 'Puntualidad (±15 min)'], ['blue', ft(tEsp), 'Tiempo total de espera'], ['green', ft(tOp), 'Tiempo total de operación'], ['orange', ft(tTot), 'Tiempo total (llegada → fin)']]
         .map(k => `<div class="stat-card ${k[0]}"><div class="stat-val">${k[1]}</div><div class="stat-lbl">${k[2]}</div></div>`).join('');
     const tabla = (tit, key) => {
         const m = {}; data.forEach(h => { const k = h[key] || '—'; (m[k] = m[k] || []).push(h); });

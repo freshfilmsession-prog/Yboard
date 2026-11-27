@@ -3331,6 +3331,13 @@ renderPizarra();
 .pn-row input{width:96px}
 .pn-row button{margin-left:auto;border:0;border-radius:4px;padding:6px 14px;background:#f57f17;color:#fff;font:700 20px 'Caveat',cursive;cursor:pointer}
 .pn-row button:active{transform:scale(.94)}
+.pn-g{width:100%;margin-top:6px;border:1px dashed rgba(90,70,0,.5);background:rgba(255,255,255,.5);border-radius:4px;padding:5px 6px;font:700 17px 'Caveat',cursive;color:#3b2f00;min-width:0;box-sizing:border-box}
+.pn-gif{display:block;width:100%;max-height:150px;object-fit:cover;border-radius:3px;margin:6px 0 2px;background:rgba(0,0,0,.08);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pn-gif-x{margin:6px 0 2px;padding:10px 6px;border-radius:3px;border:1px dashed rgba(90,70,0,.4);text-align:center;font:700 16px 'Caveat',cursive;color:rgba(43,34,0,.55)}
+.pn-stk .pn-gif{max-height:84px;margin:5px 0 3px}
+.pn-stk .pn-gif-x{padding:6px 4px;font-size:15px}
+@media(min-width:901px){#col-5.pn-has.pn-hasg{min-height:272px}}
+@media(max-width:900px){#col-5.pn-has,.dock-col.pn-has{min-height:calc(78px + 132px * var(--n,1) + 94px * var(--g,0))}}
 .pn-flt{display:flex;gap:6px;padding:0 10px 8px;flex-wrap:wrap}
 .pn-flt button{border:0;border-radius:12px;padding:3px 11px;background:rgba(0,0,0,.28);color:#ffe9b8;font:700 17px 'Caveat',cursive;cursor:pointer}
 .pn-flt button.on{background:#fdd835;color:#3b2f00}
@@ -3481,6 +3488,7 @@ renderPizarra();
       <button type="button" class="pn-sw leo pn-vip" data-c="leo" title="Leopardo" onclick="pnCol('leo')"></button>
       <button type="button" class="pn-sw zeb pn-vip" data-c="zeb" title="Cebra" onclick="pnCol('zeb')"></button>
     </div>
+    <input id="pn-g" class="pn-g" maxlength="300" placeholder="🎞 GIF opcional: pega aquí el enlace de Giphy" autocomplete="off">
     <div class="pn-row">
       <select id="pn-m"><option value="0">General</option><option value="2">Muelle 02</option><option value="3">Muelle 03</option><option value="4">Muelle 04</option><option value="5">Pasillo</option></select>
       <input id="pn-f" maxlength="14" placeholder="Firma">
@@ -3535,7 +3543,7 @@ function pegados(){
     const L=vivas().filter(x=>!x.done&&x.m==m).sort((a,b)=>b.id-a.id);
     const vis=L.slice(0,3),extra=L.length-vis.length;
     let box=hd.querySelector(':scope > .pn-stuck');
-    col.classList.toggle('pn-has',vis.length>0);col.style.setProperty('--n',vis.length||1);
+    col.classList.toggle('pn-has',vis.length>0);col.style.setProperty('--n',vis.length||1);const ng=vis.filter(x=>x.g).length;col.style.setProperty('--g',ng);col.classList.toggle('pn-hasg',ng>0);
     if(!vis.length){if(box)box.remove();return;}
     if(!box){
       box=document.createElement('div');box.className='pn-stuck';hd.appendChild(box);
@@ -3544,7 +3552,9 @@ function pegados(){
         const st=e.target.closest('.pn-stk');if(!st)return;
         const b=e.target.closest('button[data-a]');
         if(b){
-          const id=+st.dataset.id;st.classList.add('out');
+          const id=+st.dataset.id;
+          if(b.dataset.a==='nogif'){window.pnQuitaGif(id);return;}
+          st.classList.add('out');
           setTimeout(()=>{b.dataset.a==='done'?window.pnDone(id):window.pnDel(id);},400);
           return;
         }
@@ -3553,7 +3563,7 @@ function pegados(){
         if(!was)st.classList.add('on');
       });
     }
-    const sig=vis.map(n=>[n.id,n.txt,n.by,n.u,n.c].join('~')).join('|')+'|'+extra;
+    const sig=vis.map(n=>[n.id,n.txt,n.by,n.u,n.c,n.g].join('~')).join('|')+'|'+extra;
     if(box.dataset.sig===sig)return;
     box.dataset.sig=sig;
     box.innerHTML=vis.map(n=>{
@@ -3561,8 +3571,8 @@ function pegados(){
       const j=((n.id%7)-3)*0.45,len=n.txt.length,sz=len>110?'s':len>55?'m':'';
       const fx=f.t==='pin'?`<i class="pn-fix pin ${f.k}"></i>`:f.t==='tape'?'<i class="pn-fix tape"></i>':'<i class="pn-fix mag"></i>';
       return `<div class="pn-stk c-${CC(n)} ${fresh?'fresh':''}" data-id="${n.id}" style="--rot:${(f.rot+j).toFixed(2)}deg;--rx:${f.rx}deg;--ry:${f.ry}deg;--px:${f.px}%">
-        ${fx}<div class="pn-stk-txt ${sz}">${esc(n.txt)}</div>${n.by?`<div class="pn-stk-sig">— ${esc(n.by)}</div>`:'<div style="height:14px"></div>'}
-        <div class="pn-stk-act"><button data-a="done" title="Hecho">✔</button><button data-a="del" title="Arrancar y tirar">🗑</button></div></div>`;
+        ${fx}<div class="pn-stk-txt ${sz}">${esc(n.txt)}</div>${n.g?`<img class="pn-gif" src="${esc(gifSrc(n.g,0))}" data-g="${esc(n.g)}" data-i="0" loading="lazy" alt="GIF" draggable="false">`:''}${n.by?`<div class="pn-stk-sig">— ${esc(n.by)}</div>`:'<div style="height:14px"></div>'}
+        <div class="pn-stk-act"><button data-a="done" title="Hecho">✔</button>${n.g?'<button data-a="nogif" title="Quitar el GIF">🚫</button>':''}<button data-a="del" title="Arrancar y tirar">🗑</button></div></div>`;
     }).join('')+(extra>0?`<div class="pn-more">+${extra} más</div>`:'');
     vis.forEach(n=>pegSeen.add(n.id+'@'+m));
   });
@@ -3593,22 +3603,41 @@ function render(){
     $('pn-list').innerHTML=V.length?V.map(n=>`<div class="pn-note c-${CC(n)} ${n.done?'done':''}" data-id="${n.id}" style="--r:${rot(n.id)}deg;${vistos.has(n.id)?'animation:none':''}">
       <span class="pn-tag">${tag(n.m)}</span><br>
       <span class="pn-txt ${n.done?'d':''}">${esc(n.txt)}</span>
+      ${n.g?`<img class="pn-gif" src="${esc(gifSrc(n.g,0))}" data-g="${esc(n.g)}" data-i="0" loading="lazy" alt="GIF" draggable="false">`:''}
       <div class="pn-exp">caduca en ${resta(n)}</div>
       ${n.by?`<div class="pn-sig">— ${esc(n.by)}</div>`:'<div style="height:22px"></div>'}
-      <div class="pn-act"><button class="pn-grip" title="Arrastra a un muelle" aria-label="Arrastrar">✥</button><button title="${n.done?'Reabrir':'Tachar (hecho)'}" onclick="pnDone(${n.id})">${n.done?'↩':'✔'}</button><button title="Arrancar y tirar" onclick="pnDel(${n.id})">🗑</button></div>
+      <div class="pn-act"><button class="pn-grip" title="Arrastra a un muelle" aria-label="Arrastrar">✥</button><button title="${n.done?'Reabrir':'Tachar (hecho)'}" onclick="pnDone(${n.id})">${n.done?'↩':'✔'}</button>${n.g?`<button title="Quitar el GIF" onclick="pnQuitaGif(${n.id})">🚫</button>`:''}<button title="Arrancar y tirar" onclick="pnDel(${n.id})">🗑</button></div>
     </div>`).join(''):'<div class="pn-empty">No hay posits por aquí 🙂</div>';
   }
   L.forEach(n=>vistos.add(n.id));primera=false;chips();
 }
+/* ── GIFs de Giphy: se guarda solo el ID (texto), no el archivo ── */
+function gifId(txt){
+  const t=String(txt||'').trim();if(!t)return '';
+  const m=t.match(/giphy\.com\/(?:gifs|stickers|clips|embed)\/(?:[^\s"'?#\/]*-)?([A-Za-z0-9]{8,})(?:[\/?#"'\s]|$)/i)
+     ||t.match(/giphy\.com\/media\/(?:v1\.[^\/]+\/)?([A-Za-z0-9]{8,})\//i)
+     ||t.match(/i\.giphy\.com\/(?:media\/)?([A-Za-z0-9]{8,})(?:[\.\/?]|$)/i);
+  return m?m[1]:'';
+}
+function gifSrc(id,i){return 'https://media.giphy.com/media/'+id+'/'+(i?'giphy.gif':'200w.gif');}
 function guardar(){broadcastState();render();}
+window.pnQuitaGif=function(id){const n=notas.find(x=>x.id===id);if(!n)return;n.g='';n.u=Date.now();guardar();};
+/* si el GIF no carga: prueba la versión completa y, si tampoco, deja un aviso discreto (el texto siempre se ve) */
+document.addEventListener('error',function(e){
+  const im=e.target;if(!im||!im.classList||!im.classList.contains('pn-gif'))return;
+  if(im.dataset.i==='0'){im.dataset.i='1';im.src=gifSrc(im.dataset.g,1);}
+  else{const d=document.createElement('div');d.className='pn-gif-x';d.textContent='🎞 GIF no disponible';im.replaceWith(d);}
+},true);
 window.pnToggle=function(forzar){const p=$('pn-panel');const abrir=forzar===true||!p.classList.contains('open');p.classList.toggle('open',abrir);if(abrir){vistos=new Set(vistos);render();}};
 window.pnF=function(f){filtro=f;render();};
 window.pnAdd=function(){
   const t=$('pn-t').value.trim();if(!t){$('pn-t').focus();return;}
   const by=$('pn-f').value.trim();try{localStorage.setItem('pn_firma',by)}catch(_){}
+  const gt=$('pn-g').value.trim();let g='';
+  if(gt){g=gifId(gt);if(!g){showToast('🎞 Enlace de Giphy no válido (usa el de giphy.com)');$('pn-g').focus();return;}}
   const id=Date.now();
-  notas.push({id,txt:t,m:parseInt($('pn-m').value)||0,by,t:id,u:id,done:0,del:0,c:(VIP.includes(col)&&!esMiriam(by))?'y':col});
-  $('pn-t').value='';guardar();
+  notas.push({id,txt:t,m:parseInt($('pn-m').value)||0,by,t:id,u:id,done:0,del:0,c:(VIP.includes(col)&&!esMiriam(by))?'y':col,g});
+  $('pn-t').value='';$('pn-g').value='';guardar();
 };
 window.pnDone=function(id){const n=notas.find(x=>x.id===id);if(!n)return;n.done=n.done?0:1;n.u=Date.now();guardar();};
 window.pnDel=function(id){
